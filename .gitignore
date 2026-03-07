@@ -1,0 +1,80 @@
+# ─── Python ───────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.pyo
+*.pyd
+
+# ─── Build / Distribution ─────────────────────────────
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+wheels/
+sdist/
+
+# ─── Virtual Environments ─────────────────────────────
+venv/
+.venv/
+env/
+.env/
+ENV/
+.python-version
+
+# ─── Testing & Coverage ───────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+nosetests.xml
+
+# ─── Linting ──────────────────────────────────────────
+.flake8
+.mypy_cache/
+.ruff_cache/
+
+# ─── IDE & Editors ────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+
+# ─── OS ───────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ─── Logs ─────────────────────────────────────────────
+*.log
+logs/
+*.out
+
+# ─── Secrets & Config locaux ──────────────────────────
+.env
+.env.local
+.env.*.local
+secrets.json
+config.local.py
+
+# ─── SysNarrator spécifique ───────────────────────────
+sysnarrator.log
+report.json
+*.report
+
+# ─── Jupyter ──────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ─── Docker ───────────────────────────────────────────
+.dockerignore
+docker-compose.override.yml
