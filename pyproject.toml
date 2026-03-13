@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "sysnarrator"
+version = "0.1.0"
+description = "Your Linux system, in plain human language."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+  { name = "Youssef Laaroussi" },
+  { name = "SysNarrator Contributors" }
+]
+keywords = ["linux", "ubuntu", "system", "monitoring", "cli", "performance"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: System :: Monitoring",
+  "Topic :: System :: Systems Administration",
+]
+dependencies = [
+  "psutil>=5.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "flake8>=6.0",
+  "black>=23.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Youssef-Laaroussi/sysnarrator"
+Repository = "https://github.com/Youssef-Laaroussi/sysnarrator"
+Issues = "https://github.com/Youssef-Laaroussi/sysnarrator/issues"
+Changelog = "https://github.com/Youssef-Laaroussi/sysnarrator/blob/main/CHANGELOG.md"
+
+[project.scripts]
+sysnarrator = "sysnarrator.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sysnarrator*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
