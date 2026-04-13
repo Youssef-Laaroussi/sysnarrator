@@ -24,12 +24,26 @@ class C:
     # Professional colors
     ORANGE  = "\033[38;5;208m"
     BLUE    = "\033[38;5;33m"
+    GREEN_PRO = "\033[38;5;76m"
+    RED_PRO = "\033[38;5;196m"
+    YELLOW_PRO = "\033[38;5;226m"
 
 LEVEL_COLORS = {
-    'critical': C.RED,
-    'warning':  C.YELLOW,
-    'ok':       C.GREEN,
-    'info':     C.CYAN,
+    'critical': C.RED_PRO,
+    'warning':  C.YELLOW_PRO,
+    'ok':       C.GREEN_PRO,
+    'info':     C.BLUE,
+}
+
+
+CATEGORY_COLORS = {
+    'system': C.GREEN_PRO,
+    'cpu': C.ORANGE,
+    'ram': C.BLUE,
+    'disk': C.GREEN_PRO,
+    'network': C.BLUE,
+    'processes': C.BLUE,
+    'temperature': C.ORANGE,
 }
 
 ALL_MODULES = ['cpu', 'ram', 'disk', 'network', 'processes', 'temperature', 'uptime', 'system']
@@ -39,26 +53,35 @@ def clear_screen():
     os.system('clear')
 
 
-def print_colored_bar(label, percent, width=30, no_color=False):
-    """Print HTOP-style colored bar"""
+def _severity_color(percent: float) -> str:
+    if percent >= 90:
+        return C.RED_PRO
+    if percent >= 75:
+        return C.YELLOW_PRO
+    if percent >= 50:
+        return C.ORANGE
+    return C.GREEN_PRO
+
+
+def print_colored_bar(label, percent, width=30, no_color=False, base_color: str | None = None):
+    """Print HTOP-style bar.
+
+    Design rule: bar color is stable per resource (CPU=orange, Mem=blue, Disk=green),
+    while the percentage text reflects severity (green/orange/yellow/red).
+    """
+    percent = max(0.0, min(100.0, float(percent)))
     filled = int(percent / 100 * width)
     empty = width - filled
-    
-    if percent >= 90:
-        color = C.RED
-    elif percent >= 75:
-        color = C.YELLOW
-    elif percent >= 50:
-        color = C.ORANGE
-    else:
-        color = C.GREEN
-    
+
+    bar_color = base_color or C.GREEN_PRO
+    pct_color = _severity_color(percent)
+
     if no_color:
         bar = '█' * filled + '░' * empty
         return f"  {label:8} [{bar}] {percent:5.1f}%"
-    
-    bar = f"{color}{C.BOLD}{'█' * filled}{C.RESET}{C.DIM}{'░' * empty}{C.RESET}"
-    return f"  {label:8} {bar} {color}{C.BOLD}{percent:5.1f}%{C.RESET}"
+
+    bar = f"{bar_color}{C.BOLD}{'█' * filled}{C.RESET}{C.DIM}{'░' * empty}{C.RESET}"
+    return f"  {label:8} [{bar}] {pct_color}{C.BOLD}{percent:5.1f}%{C.RESET}"
 
 
 def print_header(no_color=False):
@@ -80,12 +103,14 @@ def print_system_bars(no_color=False):
     cpu = psutil.cpu_percent(interval=0.3)
     mem = psutil.virtual_memory()
     swap = psutil.swap_memory()
+    disk = psutil.disk_usage('/')
     
     print()
-    print(print_colored_bar("CPU", cpu, width=25, no_color=no_color))
-    print(print_colored_bar("Mem", mem.percent, width=25, no_color=no_color))
+    print(print_colored_bar("CPU", cpu, width=25, no_color=no_color, base_color=C.ORANGE))
+    print(print_colored_bar("Mem", mem.percent, width=25, no_color=no_color, base_color=C.BLUE))
     if swap.total > 0:
-        print(print_colored_bar("Swp", swap.percent, width=25, no_color=no_color))
+        print(print_colored_bar("Swp", swap.percent, width=25, no_color=no_color, base_color=C.BLUE))
+    print(print_colored_bar("Dsk", disk.percent, width=25, no_color=no_color, base_color=C.GREEN_PRO))
     print()
 
 
@@ -100,7 +125,8 @@ def print_messages(messages, no_color=False):
             if no_color:
                 print(f"\n  [{cat.upper()}]")
             else:
-                print(f"\n  {C.BOLD}{C.BLUE}{cat.upper()}{C.RESET}")
+                cat_color = CATEGORY_COLORS.get(cat.strip().lower(), C.BLUE)
+                print(f"\n  {C.BOLD}{cat_color}{cat.upper()}{C.RESET}")
             last_category = cat
 
         if no_color:
