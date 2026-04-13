@@ -9,6 +9,7 @@ import sys
 from datetime import datetime
 from . import __version__
 from .narrator import Narrator
+import psutil
 
 class C:
     RESET   = "\033[0m"
@@ -20,6 +21,9 @@ class C:
     CYAN    = "\033[96m"
     MAGENTA = "\033[95m"
     WHITE   = "\033[97m"
+    # Professional colors
+    ORANGE  = "\033[38;5;208m"
+    BLUE    = "\033[38;5;33m"
 
 LEVEL_COLORS = {
     'critical': C.RED,
@@ -28,11 +32,33 @@ LEVEL_COLORS = {
     'info':     C.CYAN,
 }
 
-ALL_MODULES = ['cpu', 'ram', 'disk', 'network', 'processes', 'temperature', 'uptime']
+ALL_MODULES = ['cpu', 'ram', 'disk', 'network', 'processes', 'temperature', 'uptime', 'system']
 
 
 def clear_screen():
     os.system('clear')
+
+
+def print_colored_bar(label, percent, width=30, no_color=False):
+    """Print HTOP-style colored bar"""
+    filled = int(percent / 100 * width)
+    empty = width - filled
+    
+    if percent >= 90:
+        color = C.RED
+    elif percent >= 75:
+        color = C.YELLOW
+    elif percent >= 50:
+        color = C.ORANGE
+    else:
+        color = C.GREEN
+    
+    if no_color:
+        bar = '█' * filled + '░' * empty
+        return f"  {label:8} [{bar}] {percent:5.1f}%"
+    
+    bar = f"{color}{C.BOLD}{'█' * filled}{C.RESET}{C.DIM}{'░' * empty}{C.RESET}"
+    return f"  {label:8} {bar} {color}{C.BOLD}{percent:5.1f}%{C.RESET}"
 
 
 def print_header(no_color=False):
@@ -49,6 +75,20 @@ def print_header(no_color=False):
         print(f"{C.CYAN}{'═'*60}{C.RESET}")
 
 
+def print_system_bars(no_color=False):
+    """Print HTOP-style resource bars"""
+    cpu = psutil.cpu_percent(interval=0.3)
+    mem = psutil.virtual_memory()
+    swap = psutil.swap_memory()
+    
+    print()
+    print(print_colored_bar("CPU", cpu, width=25, no_color=no_color))
+    print(print_colored_bar("Mem", mem.percent, width=25, no_color=no_color))
+    if swap.total > 0:
+        print(print_colored_bar("Swp", swap.percent, width=25, no_color=no_color))
+    print()
+
+
 def print_messages(messages, no_color=False):
     last_category = None
     for msg in messages:
@@ -60,7 +100,7 @@ def print_messages(messages, no_color=False):
             if no_color:
                 print(f"\n  [{cat.upper()}]")
             else:
-                print(f"\n  {C.BOLD}{C.WHITE}{cat.upper()}{C.RESET}")
+                print(f"\n  {C.BOLD}{C.BLUE}{cat.upper()}{C.RESET}")
             last_category = cat
 
         if no_color:
@@ -74,12 +114,14 @@ def run_report(narrator, modules):
     all_messages = []
     json_data = {}
 
-    order = ['uptime', 'cpu', 'ram', 'disk', 'network', 'temperature', 'processes']
+    order = ['uptime', 'system', 'cpu', 'ram', 'disk', 'network', 'temperature', 'processes']
     for mod in order:
         if mod not in modules:
             continue
         if mod == 'uptime':
             msgs = narrator.narrate_uptime()
+        elif mod == 'system':
+            msgs = narrator.narrate_system_health()
         elif mod == 'cpu':
             msgs = narrator.narrate_cpu()
         elif mod == 'ram':
@@ -155,6 +197,7 @@ def main():
             while True:
                 clear_screen()
                 print_header(no_color)
+                print_system_bars(no_color)
                 messages, _ = run_report(narrator, modules)
                 print_messages(messages, no_color)
                 if no_color:
@@ -166,6 +209,7 @@ def main():
             print("\n\nGoodbye! 👋")
     else:
         print_header(no_color)
+        print_system_bars(no_color)
         messages, _ = run_report(narrator, modules)
         print_messages(messages, no_color)
         print()

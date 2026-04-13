@@ -217,6 +217,17 @@ class Narrator:
 
             cat = 'Disk' if self.lang == 'en' else 'Disque'
             msgs.append({'level': level, 'text': self._msg(key, free=free, total=total, pct=pct), 'category': cat})
+            
+            # Add disk full prediction if trend is positive
+            prediction = self.predict_disk_full()
+            if prediction['will_fill']:
+                hours = prediction['hours_until_full']
+                if hours < 24:
+                    warning = self._msg('disk_filling', hours=int(hours))
+                    msgs.append({'level': 'critical', 'text': warning, 'category': cat})
+                else:
+                    warning = self._msg('disk_filling', hours=int(hours))
+                    msgs.append({'level': 'warning', 'text': warning, 'category': cat})
         except Exception:
             pass
         return msgs
@@ -281,6 +292,27 @@ class Narrator:
 
         cat = 'System' if self.lang == 'en' else 'Système'
         return [{'level': level, 'text': self._msg(key, dur=dur), 'category': cat}]
+
+    def narrate_system_health(self) -> list[dict]:
+        """Narrate overall system health score."""
+        msgs = []
+        score = self.get_system_health_score()
+        
+        cat = 'System' if self.lang == 'en' else 'Système'
+        
+        if score >= 90:
+            level, status = 'ok', 'health_excellent'
+        elif score >= 75:
+            level, status = 'info', 'health_good'
+        elif score >= 60:
+            level, status = 'warning', 'health_fair'
+        else:
+            level, status = 'critical', 'health_poor'
+        
+        text = self._msg(status, score=int(score))
+        msgs.append({'level': level, 'text': text, 'category': cat})
+        
+        return msgs
 
     def narrate_top_processes(self) -> list[dict]:
         msgs = []
@@ -434,10 +466,10 @@ MESSAGES = {
         'uptime_ok':     '⏰ Uptime: {dur} — freshly started.',
         'proc_header':   '🔍 Top {n} RAM-hungry processes:',
         'proc_suggest':  '💡 Tip: {name} has been using {ram} for {dur} — restarting it could free memory.',
-        'health_excellent': 'Excellent — system running optimally',
-        'health_good': 'Good — minor issues',
-        'health_fair': 'Fair — attention needed',
-        'health_poor': 'Poor — critical action required',
+        'health_excellent': '✨ System Health: {score}/100 — Excellent, running optimally',
+        'health_good': '💚 System Health: {score}/100 — Good, minor issues',
+        'health_fair': '💛 System Health: {score}/100 — Fair, attention needed',
+        'health_poor': '❌ System Health: {score}/100 — Poor, critical action required',
     },
     'fr': {
         'cpu_critical':  '🔥 CPU saturé à {pct:.0f}% — le système est sous pression extrême.',
@@ -468,10 +500,10 @@ MESSAGES = {
         'uptime_ok':     '⏰ Uptime : {dur} — démarré récemment.',
         'proc_header':   '🔍 Top {n} processus les plus gourmands en RAM :',
         'proc_suggest':  '💡 Suggestion : {name} consomme {ram} depuis {dur} — redémarrer pourrait libérer de la mémoire.',
-        'health_excellent': 'Excellent — système optimal',
-        'health_good': 'Bon — problèmes mineurs',
-        'health_fair': 'Acceptable — attention requise',
-        'health_poor': 'Mauvais — action critique.',
+        'health_excellent': '✨ Santé du système : {score}/100 — Excellent, optimal',
+        'health_good': '💚 Santé du système : {score}/100 — Bon, problèmes mineurs',
+        'health_fair': '💛 Santé du système : {score}/100 — Acceptable, attention requise',
+        'health_poor': '❌ Santé du système : {score}/100 — Mauvais, action critique.',
     },
     'ar': {
         'cpu_critical':  '🔥 وحدة المعالجة مثقلة بنسبة {pct:.0f}% — النظام تحت ضغط شديد.',
@@ -502,9 +534,9 @@ MESSAGES = {
         'uptime_ok':     '⏰ وقت التشغيل: {dur} — تم التشغيل مؤخراً.',
         'proc_header':   '🔍 أكثر {n} عمليات استهلاكاً للذاكرة:',
         'proc_suggest':  '💡 نصيحة: {name} يستهلك {ram} منذ {dur} — إعادة تشغيله قد يحرر الذاكرة.',
-        'health_excellent': 'ممتاز — النظام يعمل بكفاءة',
-        'health_good': 'جيد — مشاكل بسيطة',
-        'health_fair': 'مقبول — يحتاج انتباه',
-        'health_poor': 'سيء — إجراء حرج مطلوب',
+        'health_excellent': '✨ صحة النظام: {score}/100 — ممتاز، يعمل بكفاءة',
+        'health_good': '💚 صحة النظام: {score}/100 — جيد، مشاكل بسيطة',
+        'health_fair': '💛 صحة النظام: {score}/100 — مقبول، يحتاج انتباه',
+        'health_poor': '❌ صحة النظام: {score}/100 — سيء، إجراء حرج مطلوب',
     },
 }
