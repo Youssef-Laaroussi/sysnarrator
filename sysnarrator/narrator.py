@@ -8,10 +8,11 @@ import time
 
 
 class ProcessHistory:
-    """Tracks process resource usage over time."""
+    """Tracks process resource usage over time with advanced analytics."""
 
     def __init__(self):
         self.records = {}
+        self.system_samples = []
 
     def update(self):
         now = time.time()
@@ -33,7 +34,7 @@ class ProcessHistory:
                 r['ram_samples'].append((now, ram_mb))
                 r['cpu_samples'].append((now, cpu))
 
-                cutoff = now - 1800
+                cutoff = now - 3600  # Keep 1 hour instead of 30min for better trend analysis
                 r['ram_samples'] = [(t, v) for t, v in r['ram_samples'] if t > cutoff]
                 r['cpu_samples'] = [(t, v) for t, v in r['cpu_samples'] if t > cutoff]
 
@@ -44,11 +45,65 @@ class ProcessHistory:
         for pid in list(self.records):
             if pid not in alive_pids:
                 del self.records[pid]
+        
+        # Record system-wide metrics
+        self.system_samples.append({
+            'time': now,
+            'cpu': psutil.cpu_percent(),
+            'ram': psutil.virtual_memory().percent,
+            'disk': psutil.disk_usage('/').percent,
+        })
+        cutoff = now - 3600
+        self.system_samples = [s for s in self.system_samples if s['time'] > cutoff]
 
     def duration_minutes(self, pid: int) -> float:
         if pid not in self.records:
             return 0
         return (time.time() - self.records[pid]['first_seen']) / 60
+
+    def detect_memory_leak(self, pid: int, min_samples: int = 5) -> dict:
+        """Detect potential memory leak in a process."""
+        if pid not in self.records:
+            return {'has_leak': False}
+        
+        samples = self.records[pid]['ram_samples']
+        if len(samples) < min_samples:
+            return {'has_leak': False, 'reason': 'not_enough_samples'}
+        
+        # Calculate trend - if RAM consistently increases, might be a leak
+        values = [v for _, v in samples[-min_samples:]]
+        avg_increase = (values[-1] - values[0]) / len(values) if len(values) > 1 else 0
+        
+        leak_score = 0
+        if avg_increase > 10:  # Growing by 10MB+ across samples
+            leak_score = min((avg_increase / 50) * 100, 100)  # Normalize to 0-100
+        
+        return {
+            'has_leak': leak_score > 50,
+            'leak_score': leak_score,
+            'growth_rate_mb': avg_increase,
+            'current_ram': values[-1],
+        }
+
+    def get_trend(self, timeframe_minutes: float = 10) -> dict:
+        """Get resource trends."""
+        now = time.time()
+        cutoff = now - (timeframe_minutes * 60)
+        recent = [s for s in self.system_samples if s['time'] > cutoff]
+        
+        if len(recent) < 2:
+            return {'cpu_trend': 0, 'ram_trend': 0, 'disk_trend': 0}
+        
+        cpu_trend = recent[-1]['cpu'] - recent[0]['cpu']
+        ram_trend = recent[-1]['ram'] - recent[0]['ram']
+        disk_trend = recent[-1]['disk'] - recent[0]['disk']
+        
+        return {
+            'cpu_trend': cpu_trend,
+            'ram_trend': ram_trend,
+            'disk_trend': disk_trend,
+            'samples': len(recent),
+        }
 
 
 class Narrator:
@@ -256,8 +311,15 @@ class Narrator:
             dur_str = self._fmt_duration(p['duration'])
             name = p['name'][:22]
             cpu_note = f" | CPU {p['cpu']:.0f}%" if p['cpu'] > 20 else ""
-            level = 'warning' if p['ram_mb'] > 1500 else ('info' if p['ram_mb'] > 400 else 'ok')
-            text = f"  {i}. {name:<22} (PID {p['pid']:>6})  → {ram_str} for {dur_str}{cpu_note}"
+            
+            # Detect memory leaks
+            leak_info = self.history.detect_memory_leak(p['pid'])
+            leak_warning = ""
+            if leak_info['has_leak']:
+                leak_warning = f" ⚠️ LEAK ({leak_info['leak_score']:.0f}%)"
+            
+            level = 'critical' if leak_info['has_leak'] else ('warning' if p['ram_mb'] > 1500 else ('info' if p['ram_mb'] > 400 else 'ok'))
+            text = f"  {i}. {name:<22} (PID {p['pid']:>6})  → {ram_str} for {dur_str}{cpu_note}{leak_warning}"
             msgs.append({'level': level, 'text': text, 'category': cat})
 
         if top and top[0]['ram_mb'] > 1500:
@@ -269,6 +331,75 @@ class Narrator:
             })
 
         return msgs
+
+    def predict_disk_full(self) -> dict:
+        """Predict when disk will be full based on trends."""
+        trend = self.history.get_trend(timeframe_minutes=30)
+        disk = psutil.disk_usage('/')
+        free_gb = disk.free / 1024**3
+        
+        if trend['disk_trend'] <= 0:
+            return {'will_fill': False, 'hours_until_full': None}
+        
+        # Extrapolate: if disk trend is positive (growing), how long until full?
+        free_pct = 100 - disk.percent
+        trend_per_sample = trend['disk_trend'] / max(trend['samples'], 1)
+        if trend_per_sample > 0:
+            # Approximate hours until disk full
+            minutes_full = (free_pct / trend_per_sample) * 30 / trend['samples']
+            hours_full = minutes_full / 60
+            return {
+                'will_fill': hours_full < 48,  # Alert if fills within 48 hours
+                'hours_until_full': hours_full,
+                'trend_per_30min': trend['disk_trend'],
+            }
+        
+        return {'will_fill': False}
+
+    def get_system_health_score(self) -> int:
+        """Calculate overall system health (0-100)."""
+        score = 100
+        
+        # CPU impact
+        cpu_pct = psutil.cpu_percent(interval=0.1)
+        if cpu_pct > 90:
+            score -= 30
+        elif cpu_pct > 70:
+            score -= 15
+        elif cpu_pct > 50:
+            score -= 5
+        
+        # Memory impact
+        mem = psutil.virtual_memory()
+        if mem.percent > 90:
+            score -= 30
+        elif mem.percent > 75:
+            score -= 15
+        elif mem.percent > 50:
+            score -= 5
+        
+        # Disk impact
+        disk = psutil.disk_usage('/')
+        if disk.percent > 95:
+            score -= 30
+        elif disk.percent > 85:
+            score -= 15
+        elif disk.percent > 70:
+            score -= 5
+        
+        # Temperature impact (if available)
+        try:
+            temps = psutil.sensors_temperatures()
+            for chip, sensors in temps.items():
+                for s in sensors:
+                    if s.current and s.current > 85:
+                        score -= 20
+                    elif s.current and s.current > 70:
+                        score -= 10
+        except:
+            pass
+        
+        return max(0, min(100, score))
 
 
 # ─── Message Templates ──────────────────────────────────────────────────────────
@@ -291,6 +422,7 @@ MESSAGES = {
         'disk_warning':  '⚠️  Disk at {pct:.0f}%: only {free:.1f} GB free — cleanup recommended.',
         'disk_moderate': '💿 Disk at {pct:.0f}% used — {free:.1f} GB available, keep an eye on it.',
         'disk_ok':       '✅ Disk OK: {free:.1f} GB free on {total:.0f} GB ({pct:.0f}% used).',
+        'disk_filling':  '📈 Disk filling up: will be full in {hours:.1f} hours at current rate.',
         'net_heavy':     '📡 High network traffic: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s — check downloads.',
         'net_active':    '🌐 Network active: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s',
         'net_quiet':     '✅ Network quiet: ↓ {recv:.1f} KB/s — ↑ {sent:.1f} KB/s',
@@ -302,6 +434,10 @@ MESSAGES = {
         'uptime_ok':     '⏰ Uptime: {dur} — freshly started.',
         'proc_header':   '🔍 Top {n} RAM-hungry processes:',
         'proc_suggest':  '💡 Tip: {name} has been using {ram} for {dur} — restarting it could free memory.',
+        'health_excellent': 'Excellent — system running optimally',
+        'health_good': 'Good — minor issues',
+        'health_fair': 'Fair — attention needed',
+        'health_poor': 'Poor — critical action required',
     },
     'fr': {
         'cpu_critical':  '🔥 CPU saturé à {pct:.0f}% — le système est sous pression extrême.',
@@ -320,6 +456,7 @@ MESSAGES = {
         'disk_warning':  '⚠️  Disque à {pct:.0f}% : seulement {free:.1f} Go libres — nettoyage recommandé.',
         'disk_moderate': '💿 Disque à {pct:.0f}% utilisé — {free:.1f} Go disponibles, surveillez.',
         'disk_ok':       '✅ Disque OK : {free:.1f} Go libres sur {total:.0f} Go ({pct:.0f}% utilisé).',
+        'disk_filling':  '📈 Disque se remplit : sera plein dans {hours:.1f}h au rythme actuel.',
         'net_heavy':     '📡 Trafic réseau élevé : ↓ {recv:.0f} Ko/s — ↑ {sent:.0f} Ko/s — vérifiez les téléchargements.',
         'net_active':    '🌐 Réseau actif : ↓ {recv:.0f} Ko/s — ↑ {sent:.0f} Ko/s',
         'net_quiet':     '✅ Réseau calme : ↓ {recv:.1f} Ko/s — ↑ {sent:.1f} Ko/s',
@@ -331,6 +468,10 @@ MESSAGES = {
         'uptime_ok':     '⏰ Uptime : {dur} — démarré récemment.',
         'proc_header':   '🔍 Top {n} processus les plus gourmands en RAM :',
         'proc_suggest':  '💡 Suggestion : {name} consomme {ram} depuis {dur} — redémarrer pourrait libérer de la mémoire.',
+        'health_excellent': 'Excellent — système optimal',
+        'health_good': 'Bon — problèmes mineurs',
+        'health_fair': 'Acceptable — attention requise',
+        'health_poor': 'Mauvais — action critique.',
     },
     'ar': {
         'cpu_critical':  '🔥 وحدة المعالجة مثقلة بنسبة {pct:.0f}% — النظام تحت ضغط شديد.',
@@ -349,6 +490,7 @@ MESSAGES = {
         'disk_warning':  '⚠️  القرص بنسبة {pct:.0f}%: {free:.1f} GB فقط متاح — يُنصح بالتنظيف.',
         'disk_moderate': '💿 القرص بنسبة {pct:.0f}% مستخدم — {free:.1f} GB متاح.',
         'disk_ok':       '✅ القرص بخير: {free:.1f} GB متاح من {total:.0f} GB ({pct:.0f}% مستخدم).',
+        'disk_filling':  '📈 القرص يمتلئ: سيكون ممتلئاً خلال {hours:.1f}س.',
         'net_heavy':     '📡 حركة شبكة عالية: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s',
         'net_active':    '🌐 الشبكة نشطة: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s',
         'net_quiet':     '✅ الشبكة هادئة: ↓ {recv:.1f} KB/s — ↑ {sent:.1f} KB/s',
@@ -360,5 +502,9 @@ MESSAGES = {
         'uptime_ok':     '⏰ وقت التشغيل: {dur} — تم التشغيل مؤخراً.',
         'proc_header':   '🔍 أكثر {n} عمليات استهلاكاً للذاكرة:',
         'proc_suggest':  '💡 نصيحة: {name} يستهلك {ram} منذ {dur} — إعادة تشغيله قد يحرر الذاكرة.',
+        'health_excellent': 'ممتاز — النظام يعمل بكفاءة',
+        'health_good': 'جيد — مشاكل بسيطة',
+        'health_fair': 'مقبول — يحتاج انتباه',
+        'health_poor': 'سيء — إجراء حرج مطلوب',
     },
 }

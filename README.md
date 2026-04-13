@@ -86,18 +86,48 @@ It observes your system, understands the context, and tells you **exactly what's
 
 ## 🚀 Quick Start
 
-### Install (recommended)
+### Installation
+
+**Requirements:** Python 3.10+ on Linux
 
 ```bash
+# From PyPI (recommended)
 pip install sysnarrator
-```
 
-### From source
-
-```bash
-git clone https://github.com/yourusername/sysnarrator.git
+# From source
+git clone https://github.com/Youssef-Laaroussi/sysnarrator.git
 cd sysnarrator
 pip install -e .
+```
+
+### Usage
+
+```bash
+# Basic monitoring
+sysnarrator
+
+# Watch mode (updates every 2 seconds)
+sysnarrator --watch
+
+# Professional analysis (with health score)
+python -m sysnarrator.professional_cli
+
+# Export as JSON
+sysnarrator --format json > system_report.json
+
+# Show specific metrics
+sysnarrator --format plain
+```
+
+---
+
+## 📖 Documentation
+
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** — Installation & first steps
+- **[USER_GUIDE.md](USER_GUIDE.md)** — Complete feature guide
+- **[PROFESSIONAL.md](PROFESSIONAL.md)** — Professional analysis features
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Project architecture
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — How to contribute
 ```
 
 ### Run
