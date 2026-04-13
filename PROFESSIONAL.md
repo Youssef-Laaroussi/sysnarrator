@@ -34,7 +34,7 @@ SYSTEM HEALTH SCORE: 72/100 - FAIR
 - Ubuntu-specific optimization tips
 
 ### 🎨 **Professional Design**
-- Modern color scheme (Orange, Blue, Gray, Green)
+- Modern color scheme (Orange, Blue, Green, Red)
 - Clean, readable output with visual hierarchies
 - Progress bars and health indicators
 - No unnecessary clutter
@@ -48,17 +48,12 @@ SYSTEM HEALTH SCORE: 72/100 - FAIR
 
 ## 📦 Installation
 
-### Using the included setup
+### Using a virtual environment
 
 ```bash
 cd /home/youssef/sysnarrator
-
-# Option 1: Install with development dependencies
 source venv/bin/activate
-pip install -e ".[dev]"
-
-# Option 2: Use direct script (venv auto-activated)
-./sysnarrator-pro.sh
+pip install -e .
 ```
 
 ---
@@ -68,7 +63,7 @@ pip install -e ".[dev]"
 ### Basic Professional Report
 
 ```bash
-./sysnarrator-pro.sh
+sysnarrator
 ```
 
 Output includes:
@@ -80,25 +75,33 @@ Output includes:
 ### Show Analysis in French
 
 ```bash
-./sysnarrator-pro.sh --lang fr
+sysnarrator --lang fr
 ```
 
 ### Output as JSON (for automation)
 
 ```bash
-./sysnarrator-pro.sh --json
+sysnarrator --json
 ```
+
+Note: `--json` outputs JSON only (no terminal UI).
 
 ### Plain Text (for logs, no colors)
 
 ```bash
-./sysnarrator-pro.sh --no-color > system_report.txt
+sysnarrator --no-color > system_report.txt
 ```
 
 ### Show Top 10 Processes
 
 ```bash
-./sysnarrator-pro.sh --top 10
+sysnarrator --top 10
+```
+
+### Live Dashboard (HTOP-style)
+
+```bash
+sysnarrator --watch --interval 2
 ```
 
 ---
@@ -128,13 +131,8 @@ CPU Usage: 45.2%
 █████████████░░░░░░░░░░░░░░░░░░ 45% - HEALTHY
 ```
 
-- **Health Bar**: Visual representation of usage
-- **Color Coding**: Green (ok), Orange (moderate), Yellow (warning), Red (critical)
-- **Threshold Colors**:
-  - 🟢 Green: <50% (healthy)
-  - 🟠 Orange: 50-70% (moderate)
-  - 🟡 Yellow: 70-85% (warning)
-  - 🔴 Red: >85% (critical)
+- **Bars**: CPU (Orange), Mem/Swap (Blue), Disk (Green)
+- **Severity**: the percentage value turns Green/Orange/Yellow/Red based on thresholds
 
 ### Expert Analysis
 
@@ -160,44 +158,25 @@ When problems are detected:
 
 ## 🔧 Advanced Usage
 
-### Stress Testing
-
-Test how your system responds under load:
-
-```bash
-# View current system (no stress)
-./stress-test.sh demo
-
-# CPU stress test (80-90% utilization)
-./stress-test.sh cpu
-
-# Memory load test (70-80% RAM usage)
-./stress-test.sh memory
-```
-
 ### Continuous Monitoring
 
 ```bash
-# Monitor in a loop
-while true; do
-    clear
-    ./sysnarrator-pro.sh --no-color
-    sleep 3
-done
+sysnarrator --watch --interval 3
 ```
 
 ### Export Report
 
 ```bash
 # Save as plain text
-./sysnarrator-pro.sh --no-color > report.txt
+sysnarrator --no-color > report.txt
 
 # Save as JSON for automation
-./sysnarrator-pro.sh --json > report.json
+sysnarrator --json > report.json
 
 # Create timestamped report
 mkdir -p reports
-./sysnarrator-pro.sh --no-color > reports/$(date +%Y-%m-%d_%H-%M-%S).txt
+sysnarrator --no-color > reports/$(date +%Y-%m-%d_%H-%M-%S).txt
+
 ```
 
 ---
@@ -342,13 +321,13 @@ Expert Analysis:
 
 ```bash
 # Display every 30 seconds in terminal
-watch -n 30 './sysnarrator-pro.sh --no-color'
+watch -n 30 'sysnarrator --no-color'
 
 # Pipe to log file
-./sysnarrator-pro.sh --no-color >> ~/.local/share/sysnarrator.log
+sysnarrator --no-color >> ~/.local/share/sysnarrator.log
 
 # As cron job (hourly report)
-0 * * * * cd /home/youssef/sysnarrator && ./sysnarrator-pro.sh --no-color >> ~/reports/system.log
+0 * * * * cd /home/youssef/sysnarrator && source venv/bin/activate && sysnarrator --no-color >> ~/reports/system.log
 ```
 
 ### With Scripts
@@ -357,7 +336,11 @@ watch -n 30 './sysnarrator-pro.sh --no-color'
 #!/bin/bash
 # Auto-cleanup when disk >80%
 
-if [ $(./sysnarrator-pro.sh --json | jq '.disk_percent') -gt 80 ]; then
+# Note: SysNarrator JSON is narrative messages (human text). For numeric automation,
+# use standard tools like df.
+used_pct=$(df -P / | awk 'NR==2{gsub(/%/,"",$5); print $5}')
+
+if [ "$used_pct" -gt 80 ]; then
     sudo apt clean
     sudo journalctl --vacuum=3d
     rm -rf ~/.cache/tmp/*
@@ -369,29 +352,27 @@ fi
 ## 🎨 Color Scheme
 
 **Professional Color Palette:**
-- 🟠 **Orange** (#FF9500) — Primary accent, recommendations
-- 🔵 **Blue** (#0A84FF) — Information, memory metrics
-- ⚪ **Gray** — System, disk, secondary info
-- 🟢 **Green** — OK status, healthy metrics
-- 🟡 **Yellow** — Warning, moderate load
-- 🔴 **Red** — Critical, immediate action needed
+- 🟠 **Orange** — CPU bars and emphasis
+- 🔵 **Blue** — Memory/Swap bars and information
+- 🟢 **Green** — OK status and Disk bar
+- 🟡 **Yellow** — Warning severity
+- 🔴 **Red** — Critical severity
 
 ---
 
 ## 📚 Additional Commands
 
 ```bash
-# Compare with original CLI (non-professional)
-./sysnarrator.sh --help        # Standard version
-./sysnarrator-pro.sh --help    # Professional version
+# Help
+sysnarrator --help
 
 # Test different languages
-./sysnarrator-pro.sh --lang en  # English
-./sysnarrator-pro.sh --lang fr  # French
-./sysnarrator-pro.sh --lang ar  # Arabic
+sysnarrator --lang en  # English
+sysnarrator --lang fr  # French
+sysnarrator --lang ar  # Arabic
 
 # No output colors (for scripts)
-./sysnarrator-pro.sh --no-color
+sysnarrator --no-color
 ```
 
 ---
@@ -401,7 +382,7 @@ fi
 ### Report Issues
 If you find a bug or inaccuracy in analysis:
 ```bash
-./sysnarrator-pro.sh --no-color > ~/bug_report.txt
+sysnarrator --no-color > ~/bug_report.txt
 # Share the output in an issue
 ```
 
