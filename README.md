@@ -26,7 +26,7 @@
 
 ## Why SysNarrator?
 
-Every Linux tool — `htop`, `top`, `vmstat`, `iostat` — throws **raw numbers** at you.  
+Every Linux tool — `top`, `vmstat`, `iostat` — throws **raw numbers** at you.  
 You need to **already know** what those numbers mean to act on them.
 
 **SysNarrator is different.**  
@@ -44,9 +44,9 @@ It observes your system, understands the context, and tells you **exactly what's
 
 - **Human narration** — Every metric becomes a meaningful sentence
 - **Full Linux background** — Distro name, kernel, desktop environment, and architecture
-- **HTOP++ task accounting** — Tasks count, running threads, and automatic zombie / D-state process detection
+- **Advanced task accounting** — Tasks count, running threads, and automatic zombie / D-state process detection
 - **Load saturation vs core count** — True capacity calculation across logical/physical cores
-- **Disk I/O throughput** — Real-time read and write rates in MB/s (merges htop + iotop)
+- **Disk I/O throughput** — Real-time read and write rates in MB/s
 - **Process history & memory leak detection** — Tracks runtime and calculates leak probability scores
 - **Predictive disk exhaustion** — Hours-until-full countdown based on trend extrapolation
 - **Battery & power monitoring** — Health, charging state, and remaining runtime
@@ -146,7 +146,6 @@ sysnarrator --no-color
 - **[GETTING_STARTED.md](GETTING_STARTED.md)** — Installation & first steps
 - **[USER_GUIDE.md](USER_GUIDE.md)** — Complete feature guide
 - **[PROFESSIONAL.md](PROFESSIONAL.md)** — Professional analysis features
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Project architecture
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — How to contribute
 
 ### Run
@@ -245,54 +244,6 @@ sysnarrator --lang en   # English (default)
 ```
 
 To add a new language, copy `sysnarrator/i18n/en.json` and translate it. Then open a PR!
-
----
-
-## Project Structure
-
-```
-sysnarrator/
-├── sysnarrator/
-│   ├── __init__.py          # Package init
-│   ├── __main__.py          # Entry point (python -m sysnarrator)
-│   ├── cli.py               # Argument parser & main runner
-│   ├── narrator.py          # Core narration engine
-│   ├── collectors/
-│   │   ├── cpu.py           # CPU metrics collector
-│   │   ├── memory.py        # RAM & swap collector
-│   │   ├── disk.py          # Disk usage & I/O collector
-│   │   ├── network.py       # Network I/O collector
-│   │   ├── processes.py     # Process tracker with history
-│   │   └── temperature.py   # Thermal sensors collector
-│   ├── formatters/
-│   │   ├── terminal.py      # Colored terminal output
-│   │   ├── json_fmt.py      # JSON formatter
-│   │   └── plain.py         # Plain text formatter
-│   └── i18n/
-│       ├── en.json          # English messages
-│       ├── fr.json          # French messages
-│       └── ar.json          # Arabic messages
-├── tests/
-│   ├── test_narrator.py
-│   ├── test_collectors.py
-│   └── test_formatters.py
-├── docs/
-│   ├── ARCHITECTURE.md
-│   └── CONTRIBUTING_TRANSLATIONS.md
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml           # Run tests on push
-│   │   └── release.yml      # Auto-publish to PyPI
-│   └── ISSUE_TEMPLATE/
-│       ├── bug_report.md
-│       └── feature_request.md
-├── README.md
-├── CONTRIBUTING.md
-├── CHANGELOG.md
-├── LICENSE
-├── pyproject.toml
-└── setup.cfg
-```
 
 ---
 

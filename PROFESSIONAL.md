@@ -98,7 +98,7 @@ sysnarrator --no-color > system_report.txt
 sysnarrator --top 10
 ```
 
-### Live Dashboard (HTOP-style)
+### Live Dashboard (Interactive Monitor)
 
 ```bash
 sysnarrator --watch --interval 2
