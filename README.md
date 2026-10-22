@@ -15,7 +15,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Ubuntu-orange.svg)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Stars](https://img.shields.io/github/stars/yourusername/sysnarrator?style=social)]()
+[![Stars](https://img.shields.io/github/stars/Youssef-Laaroussi/sysnarrator?style=social)](https://github.com/Youssef-Laaroussi/sysnarrator)
 
 > *"Firefox consomme 2.3 Go de RAM depuis 4h — fermer les onglets inactifs libèrerait 800 Mo."*
 > Instead of raw numbers, **SysNarrator talks to you like a human would.**
@@ -24,7 +24,7 @@
 
 ---
 
-## 🤔 Why SysNarrator?
+## Why SysNarrator?
 
 Every Linux tool — `htop`, `top`, `vmstat`, `iostat` — throws **raw numbers** at you.  
 You need to **already know** what those numbers mean to act on them.
@@ -34,57 +34,57 @@ It observes your system, understands the context, and tells you **exactly what's
 
 | Classic tools | SysNarrator |
 |---|---|
-| `CPU: 87%` | `🔥 CPU saturé à 87% — Firefox + VSCode en sont la cause principale` |
-| `MEM: 7.2G / 8G` | `🚨 RAM critique (90%) — Slack tourne depuis 6h et fuit de la mémoire` |
-| `/dev/sda1: 91%` | `⚠️ Disque à 91% — ~/.cache représente 12 Go, nettoyable facilement` |
+| `CPU: 87%` | `CPU saturé à 87% — Firefox + VSCode en sont la cause principale` |
+| `MEM: 7.2G / 8G` | `RAM critique (90%) — Slack tourne depuis 6h et fuit de la mémoire` |
+| `/dev/sda1: 91%` | `Disque à 91% — ~/.cache représente 12 Go, nettoyable facilement` |
 
 ---
 
-## ✨ Features
+## Features
 
-- 🧠 **Human narration** — Every metric becomes a meaningful sentence
-- 📊 **Process history** — Tracks how long each app has been running and consuming
-- 💡 **Smart suggestions** — Actionable tips, not just observations
-- 🌡️ **Temperature monitoring** — With thermal alerts before damage
-- 🌐 **Network in plain words** — Real-time + session totals
-- 📦 **Multi-format output** — Terminal (colored), JSON, plain text
-- 🔄 **Watch mode** — Live dashboard, refreshes every N seconds
-- 🌍 **Multi-language** — English 🇬🇧, Français 🇫🇷, العربية 🇲🇦 (and more via contributions)
-- 🪶 **Zero bloat** — Only depends on `psutil`, nothing else
-- 🐳 **Docker support** — Run in containers too
+- **Human narration** — Every metric becomes a meaningful sentence
+- **Process history** — Tracks how long each app has been running and consuming
+- **Smart suggestions** — Actionable tips, not just observations
+- **Temperature monitoring** — With thermal alerts before damage
+- **Network in plain words** — Real-time + session totals
+- **Multi-format output** — Terminal (colored), JSON, plain text
+- **Watch mode** — Live dashboard, refreshes every N seconds
+- **Multi-language** — English, Français, العربية (and more via contributions)
+- **Zero bloat** — Only depends on `psutil`, nothing else
+- **Docker support** — Run in containers too
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 ```
 ╔══════════════════════════════════════════════════════════╗
 ║           SysNarrator  •  14:32:05  •  ubuntu-pc         ║
 ╠══════════════════════════════════════════════════════════╣
 ║  CPU                                                     ║
-║  ● CPU tranquille à 18% — votre machine respire.         ║
-║  ⚙️  Fréquence : 1800 MHz / 4200 MHz max                  ║
+║  CPU tranquille à 18% — votre machine respire.           ║
+║  Fréquence : 1800 MHz / 4200 MHz max                     ║
 ║                                                          ║
 ║  RAM                                                     ║
-║  ⚠️  RAM sous pression : 6.1 Go / 8 Go (76%)              ║
+║  RAM sous pression : 6.1 Go / 8 Go (76%)                 ║
 ║     → Fermez des applications pour libérer de l'espace   ║
 ║                                                          ║
 ║  Disque                                                  ║
-║  ✅ Disque OK : 45 Go libres sur 256 Go (82% utilisé)    ║
+║  Disque OK : 45 Go libres sur 256 Go (82% utilisé)       ║
 ║                                                          ║
 ║  Réseau                                                  ║
-║  🌐 Réseau actif : ↓ 248 Ko/s — ↑ 12 Ko/s               ║
+║  Réseau actif : ↓ 248 Ko/s — ↑ 12 Ko/s                   ║
 ║                                                          ║
 ║  Top Processus                                           ║
 ║  1. firefox        (PID  2341)  → 2.1 Go RAM depuis 4h   ║
-║  💡 Firefox consomme beaucoup — redémarrer libèrerait     ║
+║  Firefox consomme beaucoup — redémarrer libèrerait       ║
 ║     de la mémoire.                                       ║
 ╚══════════════════════════════════════════════════════════╝
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -113,22 +113,21 @@ sysnarrator --watch
 python -m sysnarrator.professional_cli
 
 # Export as JSON
-sysnarrator --format json > system_report.json
+sysnarrator --json > system_report.json
 
 # Show specific metrics
-sysnarrator --format plain
+sysnarrator --no-color
 ```
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 - **[GETTING_STARTED.md](GETTING_STARTED.md)** — Installation & first steps
 - **[USER_GUIDE.md](USER_GUIDE.md)** — Complete feature guide
 - **[PROFESSIONAL.md](PROFESSIONAL.md)** — Professional analysis features
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Project architecture
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — How to contribute
-```
 
 ### Run
 
@@ -154,7 +153,7 @@ sysnarrator --lang ar
 
 ---
 
-## 📦 Installation Details
+## Installation Details
 
 ### Requirements
 
@@ -169,16 +168,16 @@ sysnarrator --lang ar
 
 | Distro | Status |
 |---|---|
-| Ubuntu 22.04 / 24.04 | ✅ Fully supported |
-| Debian 11 / 12 | ✅ Fully supported |
-| Fedora 38+ | ✅ Supported |
-| Arch Linux | ✅ Supported |
-| Raspberry Pi OS | ✅ Supported |
-| macOS | 🔶 Partial (no temperature) |
+| Ubuntu 22.04 / 24.04 | Fully supported |
+| Debian 11 / 12 | Fully supported |
+| Fedora 38+ | Supported |
+| Arch Linux | Supported |
+| Raspberry Pi OS | Supported |
+| macOS | Partial (no temperature) |
 
 ---
 
-## 🛠️ Usage & Options
+## Usage & Options
 
 ```
 usage: sysnarrator [-h] [--watch] [--interval N] [--only MODULES]
@@ -215,7 +214,7 @@ sysnarrator --no-color >> /var/log/sysnarrator.log
 
 ---
 
-## 🌍 Internationalization (i18n)
+## Internationalization (i18n)
 
 SysNarrator supports multiple languages. Contributions for new languages are very welcome!
 
@@ -229,7 +228,7 @@ To add a new language, copy `sysnarrator/i18n/en.json` and translate it. Then op
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 sysnarrator/
@@ -277,23 +276,23 @@ sysnarrator/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are what make open source amazing. **Any contribution is welcome!**
 
 ### Ways to contribute
 
-- 🐛 **Report bugs** — Open an issue with details
-- 💡 **Suggest features** — Open a feature request
-- 🌍 **Translate** — Add a new language in `sysnarrator/i18n/`
-- 🧪 **Write tests** — Improve test coverage
-- 📖 **Improve docs** — Fix typos, add examples
-- 💻 **Write code** — Pick an issue labeled `good first issue`
+- **Report bugs** — Open an issue with details
+- **Suggest features** — Open a feature request
+- **Translate** — Add a new language in `sysnarrator/i18n/`
+- **Write tests** — Improve test coverage
+- **Improve docs** — Fix typos, add examples
+- **Write code** — Pick an issue labeled `good first issue`
 
 ### Dev setup
 
 ```bash
-git clone https://github.com/yourusername/sysnarrator.git
+git clone https://github.com/Youssef-Laaroussi/sysnarrator.git
 cd sysnarrator
 python -m venv venv
 source venv/bin/activate
@@ -305,7 +304,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ---
 
-## 📋 Roadmap
+## Roadmap
 
 - [x] Core narration engine (CPU, RAM, Disk, Network, Processes)
 - [x] Multi-language support (en, fr, ar)
@@ -322,7 +321,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
@@ -330,18 +329,18 @@ You are free to use, modify, and distribute this software for any purpose.
 
 ---
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
 - [psutil](https://github.com/giampaolo/psutil) — The backbone of system metrics collection
 - The Linux and Ubuntu open source community
-- All contributors and translators 💙
+- All contributors and translators
 
 ---
 
 <div align="center">
 
-**If SysNarrator helped you, give it a ⭐ — it means a lot!**
+**If SysNarrator helped you, give it a star — it means a lot!**
 
-Made with ❤️ for the Linux community
+Made for the Linux community
 
 </div>
