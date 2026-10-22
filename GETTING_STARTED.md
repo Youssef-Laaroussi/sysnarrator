@@ -1,13 +1,13 @@
-# 🎉 SysNarrator Professional - Ready to Go!
+#  SysNarrator Professional - Ready to Go!
 
 Welcome! Your Ubuntu system monitoring tool has been upgraded to **PROFESSIONAL EXPERT STATUS**. 
 
 Here's what you can do now:
 
-## 🚀 Quick Start
+##  Quick Start
 
 ```bash
-cd /home/youssef/sysnarrator
+cd sysnarrator
 
 # 1. See the features showcase
 ./demo.sh
@@ -23,9 +23,9 @@ cd /home/youssef/sysnarrator
 
 ---
 
-## 📊 What's Included
+##  What's Included
 
-### ✨ Professional Features
+###  Professional Features
 
 | Feature | Description |
 |---------|-------------|
@@ -37,7 +37,7 @@ cd /home/youssef/sysnarrator
 | **3 Languages** | English, French, Arabic |
 | **Professional Design** | Orange/Blue color scheme |
 
-### 🎨 Visual Output
+###  Visual Output
 
 ```
 SYSTEM HEALTH SCORE: 85/100 - GOOD
@@ -54,7 +54,7 @@ Disk Usage: 150GB / 256GB (59%)
 
 ---
 
-## 💡 Commands
+##  Commands
 
 ```bash
 # Standard professional report
@@ -81,7 +81,7 @@ Disk Usage: 150GB / 256GB (59%)
 
 ---
 
-## 🎯 How It Works
+##  How It Works
 
 ### System Health Score (0-100)
 
@@ -93,11 +93,11 @@ The score is calculated from:
 - **Temperature** — Penalty if >70°C, >85°C
 
 **Scoring:**
-- 🟢 **90-100** = EXCELLENT (no action needed)
-- 🟢 **75-89** = GOOD (minor optimizations possible)
-- 🟡 **60-74** = FAIR (some attention recommended)
-- 🟠 **40-59** = POOR (multiple issues)
-- 🔴 **0-39** = CRITICAL (immediate action needed)
+-  **90-100** = EXCELLENT (no action needed)
+-  **75-89** = GOOD (minor optimizations possible)
+-  **60-74** = FAIR (some attention recommended)
+-  **40-59** = POOR (multiple issues)
+-  **0-39** = CRITICAL (immediate action needed)
 
 ### Expert Analysis
 
@@ -110,7 +110,7 @@ When problems are detected, you get:
 Example:
 
 ```
-⚠️ High RAM Usage (>85%)
+ High RAM Usage (>85%)
 Causes:
   • Memory leaks in applications
   • Too many browser tabs
@@ -124,14 +124,14 @@ Solutions:
 
 ---
 
-## 📁 File Structure
+##  File Structure
 
 ```
 sysnarrator/
 ├── sysnarrator-pro.sh          ← Main professional CLI
 ├── stress-test.sh              ← Load testing tool
 ├── demo.sh                     ← Feature showcase
-├── PROFESSIONAL.md             ← Complete guide (60+ pages)
+├── REPORT.md                   ← Detailed report guide
 ├── sysnarrator/
 │   ├── professional_cli.py     ← Pro CLI logic
 │   ├── expert_analyzer.py      ← Expert analysis engine
@@ -143,12 +143,12 @@ sysnarrator/
 
 ---
 
-## 🔬 Example Reports
+##  Example Reports
 
 ### Healthy System
 ```
 SYSTEM HEALTH SCORE: 95/100 - EXCELLENT
-✓ System running optimally
+ System running optimally
 
 All metrics GREEN - no action needed
 ```
@@ -158,11 +158,11 @@ All metrics GREEN - no action needed
 SYSTEM HEALTH SCORE: 65/100 - FAIR
 
 Expert Analysis:
-├─ ⚠️ High CPU Usage (75%)
+├─  High CPU Usage (75%)
 │  └─ Solutions: Close browser tabs, check processes
-├─ ⚠️ High RAM Usage (82%)
+├─  High RAM Usage (82%)
 │  └─ Solutions: Close memory-heavy apps, check Docker
-└─ 💡 Disk Usage (78%)
+└─  Disk Usage (78%)
    └─ Action: Consider cleanup, remove old logs
 ```
 
@@ -171,16 +171,16 @@ Expert Analysis:
 SYSTEM HEALTH SCORE: 25/100 - CRITICAL
 
 Expert Analysis:
-├─ 🔴 CPU SATURATED (95%)
-├─ 🔴 RAM CRITICAL (92%, using SWAP = VERY SLOW)
-└─ 🔴 DISK FULL (98%, UNSTABLE)
+├─  CPU SATURATED (95%)
+├─  RAM CRITICAL (92%, using SWAP = VERY SLOW)
+└─  DISK FULL (98%, UNSTABLE)
 
 Urgent: All 3 systems need immediate attention!
 ```
 
 ---
 
-## 🛠️ Ubuntu Optimization Examples
+##  Ubuntu Optimization Examples
 
 The expert analysis provides Ubuntu-specific solutions like:
 
@@ -206,12 +206,12 @@ sudo smartctl -a /dev/sda
 
 ---
 
-## 📖 Full Documentation
+##  Full Documentation
 
 For detailed documentation, see:
 
 ```bash
-cat PROFESSIONAL.md
+cat REPORT.md
 ```
 
 Covers:
@@ -224,7 +224,7 @@ Covers:
 
 ---
 
-## 🎯 Next Steps
+##  Next Steps
 
 1. **Run the showcase**
    ```bash
@@ -243,7 +243,7 @@ Covers:
 
 4. **Read full docs**
    ```bash
-   less PROFESSIONAL.md
+   less REPORT.md
    ```
 
 5. **Set up monitoring**
@@ -254,25 +254,25 @@ Covers:
 
 ---
 
-## 💡 Pro Tips
+##  Pro Tips
 
-✅ **For quick diagnosis:**
+ **For quick diagnosis:**
 ```bash
 ./sysnarrator-pro.sh --no-color
 ```
 
-✅ **For automation/logging:**
+ **For automation/logging:**
 ```bash
 ./sysnarrator-pro.sh --json > report.json
 ./sysnarrator-pro.sh --no-color >> system.log
 ```
 
-✅ **For continuous monitoring:**
+ **For continuous monitoring:**
 ```bash
 watch -n 3 './sysnarrator-pro.sh --no-color'
 ```
 
-✅ **For exporting reports:**
+ **For exporting reports:**
 ```bash
 mkdir -p ~/reports
 ./sysnarrator-pro.sh --no-color > ~/reports/$(date +%Y-%m-%d_%H:%M:%S).txt
@@ -280,22 +280,22 @@ mkdir -p ~/reports
 
 ---
 
-## 🌟 Features You Now Have
+##  Features You Now Have
 
-- ✅ **Professional Design** — Orange, Blue, Gray color palette
-- ✅ **Health Scoring** — Automatic 0-100 assessment
-- ✅ **Expert Analysis** — Root causes + solutions
-- ✅ **Ubuntu-Specific** — Optimization tips for Linux
-- ✅ **Multi-Language** — EN, FR, AR support
-- ✅ **Visual Metrics** — Progress bars & indicators
-- ✅ **Memory Analysis** — Leak detection
-- ✅ **Load Testing** — Stress test capabilities
-- ✅ **Multiple Exports** — JSON, plain text, colors
-- ✅ **Zero Dependencies** — Only psutil (you have it already)
+-  **Professional Design** — Orange, Blue, Gray color palette
+-  **Health Scoring** — Automatic 0-100 assessment
+-  **Expert Analysis** — Root causes + solutions
+-  **Ubuntu-Specific** — Optimization tips for Linux
+-  **Multi-Language** — EN, FR, AR support
+-  **Visual Metrics** — Progress bars & indicators
+-  **Memory Analysis** — Leak detection
+-  **Load Testing** — Stress test capabilities
+-  **Multiple Exports** — JSON, plain text, colors
+-  **Zero Dependencies** — Only psutil (you have it already)
 
 ---
 
-## 📞 Need Help?
+##  Need Help?
 
 ```bash
 # Show help
@@ -305,7 +305,7 @@ mkdir -p ~/reports
 ./demo.sh
 
 # Read documentation  
-cat PROFESSIONAL.md
+cat REPORT.md
 
 # Check original version
 ./sysnarrator.sh --help
@@ -313,7 +313,7 @@ cat PROFESSIONAL.md
 
 ---
 
-**You now have a PROFESSIONAL-GRADE system monitoring tool for Ubuntu! 🚀**
+**You now have a PROFESSIONAL-GRADE system monitoring tool for Ubuntu! **
 
 Start with: `./demo.sh`
 

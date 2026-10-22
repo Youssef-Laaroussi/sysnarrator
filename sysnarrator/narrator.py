@@ -5,6 +5,7 @@ Transforms raw system metrics into human-readable messages.
 
 import psutil
 import time
+from sysnarrator.collectors.system_info import SystemInfoCollector
 
 
 class ProcessHistory:
@@ -114,6 +115,8 @@ class Narrator:
         self.top_n = top_n
         self.boot_time = psutil.boot_time()
         self.history = ProcessHistory()
+        self.prev_disk_io = psutil.disk_io_counters()
+        self.prev_io_time = time.time()
 
     def _fmt_bytes(self, mb: float) -> str:
         if mb >= 1024:
@@ -228,19 +231,53 @@ class Narrator:
                 else:
                     warning = self._msg('disk_filling', hours=int(hours))
                     msgs.append({'level': 'warning', 'text': warning, 'category': cat})
+            # Disk I/O throughput
+            now = time.time()
+            io = psutil.disk_io_counters()
+            if io and hasattr(self, 'prev_disk_io') and self.prev_disk_io:
+                dt = max(0.1, now - self.prev_io_time)
+                read_rate = ((io.read_bytes - self.prev_disk_io.read_bytes) / 1024 / 1024) / dt
+                write_rate = ((io.write_bytes - self.prev_disk_io.write_bytes) / 1024 / 1024) / dt
+                if read_rate > 0.1 or write_rate > 0.1:
+                    msgs.append({
+                        'level': 'info',
+                        'text': self._msg('io_rates', read_rate=read_rate, write_rate=write_rate),
+                        'category': cat
+                    })
+            self.prev_disk_io = io
+            self.prev_io_time = now
+
+            # Innovative Disk Reclamation Analysis: identify top hogs and commands
+            if pct >= 80:
+                from .collectors.disk import DiskCollector
+                cleanups = DiskCollector.get_cleanup_opportunities()
+                if cleanups:
+                    top_cleanup = cleanups[0]
+                    cat_clean = 'Disk' if self.lang == 'en' else 'Disque'
+                    msgs.append({
+                        'level': 'warning',
+                        'text': f"Reclaim Space: {top_cleanup['target']} holds {top_cleanup['reclaimable_mb']:.0f} MB -> run: {top_cleanup['command']}",
+                        'category': cat_clean
+                    })
         except Exception:
             pass
         return msgs
 
+
     def narrate_network(self) -> list[dict]:
         msgs = []
         try:
-            n1 = psutil.net_io_counters()
-            time.sleep(1)
+            now = time.time()
             n2 = psutil.net_io_counters()
-
-            recv = (n2.bytes_recv - n1.bytes_recv) / 1024
-            sent = (n2.bytes_sent - n1.bytes_sent) / 1024
+            if hasattr(self, 'prev_net_io') and self.prev_net_io:
+                dt = max(0.1, now - self.prev_net_time)
+                recv = ((n2.bytes_recv - self.prev_net_io.bytes_recv) / 1024) / dt
+                sent = ((n2.bytes_sent - self.prev_net_io.bytes_sent) / 1024) / dt
+            else:
+                recv = 0.0
+                sent = 0.0
+            self.prev_net_io = n2
+            self.prev_net_time = now
 
             if recv > 1024 or sent > 1024:
                 level, key = 'warning', 'net_heavy'
@@ -294,12 +331,11 @@ class Narrator:
         return [{'level': level, 'text': self._msg(key, dur=dur), 'category': cat}]
 
     def narrate_system_health(self) -> list[dict]:
-        """Narrate overall system health score."""
+        """Narrate overall system health, Linux OS background, tasks, and load."""
         msgs = []
         score = self.get_system_health_score()
-        
         cat = 'System' if self.lang == 'en' else 'Système'
-        
+
         if score >= 90:
             level, status = 'ok', 'health_excellent'
         elif score >= 75:
@@ -308,11 +344,91 @@ class Narrator:
             level, status = 'warning', 'health_fair'
         else:
             level, status = 'critical', 'health_poor'
-        
+
         text = self._msg(status, score=int(score))
         msgs.append({'level': level, 'text': text, 'category': cat})
-        
+
+        # Linux OS environment & hardware background
+        try:
+            env = SystemInfoCollector.get_linux_environment()
+            msgs.append({
+                'level': 'info',
+                'text': self._msg('env_info', os_name=env['os_name'], kernel=env['kernel'], arch=env['arch'], desktop=env['desktop']),
+                'category': cat
+            })
+        except Exception:
+            pass
+
+        # Load average & CPU saturation
+        try:
+            load = SystemInfoCollector.get_load_saturation()
+            sat = load['saturation1_pct']
+            if sat > 100:
+                msgs.append({
+                    'level': 'warning',
+                    'text': self._msg('load_saturation_warn', sat=sat, cores=load['cores'], load1=load['load1']),
+                    'category': cat
+                })
+            else:
+                msgs.append({
+                    'level': 'ok',
+                    'text': self._msg('load_saturation_ok', load1=load['load1'], load5=load['load5'], load15=load['load15'], sat=sat, cores=load['cores']),
+                    'category': cat
+                })
+        except Exception:
+            pass
+
+        # Task & Thread accounting
+        try:
+            tasks = SystemInfoCollector.get_task_stats()
+            msgs.append({
+                'level': 'info',
+                'text': self._msg('tasks_summary', total=tasks['total_processes'], running=tasks['running'], sleeping=tasks['sleeping'], threads=tasks['total_threads']),
+                'category': cat
+            })
+            if tasks['zombie'] > 0:
+                pids_str = ', '.join(str(p) for p in tasks['zombie_pids'][:5])
+                msgs.append({
+                    'level': 'warning',
+                    'text': self._msg('tasks_zombies_alert', count=tasks['zombie'], pids=pids_str),
+                    'category': cat
+                })
+            if tasks['uninterruptible_disk_sleep'] > 0:
+                pids_str = ', '.join(str(p) for p in tasks['d_state_pids'][:5])
+                msgs.append({
+                    'level': 'critical',
+                    'text': self._msg('tasks_dstate_alert', count=tasks['uninterruptible_disk_sleep'], pids=pids_str),
+                    'category': cat
+                })
+        except Exception:
+            pass
+
+        # Battery / Power status (if available)
+        try:
+            battery = SystemInfoCollector.get_battery_info()
+            if battery:
+                state = 'charging' if battery['power_plugged'] else 'discharging'
+                if self.lang == 'fr':
+                    state = 'en charge' if battery['power_plugged'] else 'sur batterie'
+                elif self.lang == 'ar':
+                    state = 'شحن' if battery['power_plugged'] else 'بطارية'
+
+                if battery['secsleft'] and battery['secsleft'] > 0:
+                    mins = battery['secsleft'] / 60
+                    time_str = self._fmt_duration(mins)
+                else:
+                    time_str = 'AC power' if self.lang == 'en' else ('secteur' if self.lang == 'fr' else 'تيار مستمر')
+
+                msgs.append({
+                    'level': 'info',
+                    'text': self._msg('battery_status', pct=battery['percent'], state=state, time_str=time_str),
+                    'category': cat
+                })
+        except Exception:
+            pass
+
         return msgs
+
 
     def narrate_top_processes(self) -> list[dict]:
         msgs = []
@@ -348,7 +464,7 @@ class Narrator:
             leak_info = self.history.detect_memory_leak(p['pid'])
             leak_warning = ""
             if leak_info['has_leak']:
-                leak_warning = f" ⚠️ LEAK ({leak_info['leak_score']:.0f}%)"
+                leak_warning = f"  LEAK ({leak_info['leak_score']:.0f}%)"
             
             level = 'critical' if leak_info['has_leak'] else ('warning' if p['ram_mb'] > 1500 else ('info' if p['ram_mb'] > 400 else 'ok'))
             text = f"  {i}. {name:<22} (PID {p['pid']:>6})  → {ram_str} for {dur_str}{cpu_note}{leak_warning}"
@@ -361,6 +477,24 @@ class Narrator:
                 'text': self._msg('proc_suggest', name=p['name'], ram=self._fmt_bytes(p['ram_mb']), dur=self._fmt_duration(p['duration'])),
                 'category': cat
             })
+
+        # Innovative Aggregated Application View (surpassing single PID lists)
+        try:
+            from .collectors.processes import ProcessCollector
+            app_groups = ProcessCollector.get_grouped_applications()
+            # Top 3 application groups by collective RAM
+            top_apps = [a for a in app_groups if a['ram_mb'] > 200][:3]
+            if top_apps:
+                app_lines = []
+                for a in top_apps:
+                    app_lines.append(f"{a['app']} ({a['process_count']} procs: {self._fmt_bytes(a['ram_mb'])})")
+                msgs.append({
+                    'level': 'info',
+                    'text': f"  App Footprint: {' | '.join(app_lines)}",
+                    'category': cat
+                })
+        except Exception:
+            pass
 
         return msgs
 
@@ -438,105 +572,130 @@ class Narrator:
 
 MESSAGES = {
     'en': {
-        'cpu_critical':  '🔥 CPU saturated at {pct:.0f}% — system is under extreme pressure.',
-        'cpu_warning':   '⚡ CPU loaded at {pct:.0f}% — performance starting to degrade.',
-        'cpu_moderate':  '💻 CPU active at {pct:.0f}% — moderate load, all good.',
-        'cpu_ok':        '✅ CPU quiet at {pct:.0f}% — your machine is breathing easy.',
-        'cpu_hot_cores': '🌡️  Overloaded cores: {cores} — unbalanced load.',
-        'cpu_freq':      '⚙️  CPU frequency: {cur:.0f} MHz (max {mx:.0f} MHz)',
-        'ram_critical':  '🚨 RAM critical: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — freeze risk!',
-        'ram_warning':   '⚠️  RAM under pressure: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — close some apps.',
-        'ram_moderate':  '📊 RAM at {pct:.0f}%: {used:.1f} GB used out of {total:.1f} GB — normal usage.',
-        'ram_ok':        '✅ RAM comfortable: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — plenty of headroom.',
-        'swap_heavy':    '💾 Swap heavily used: {used:.1f} GB / {total:.1f} GB — disk compensating RAM, system slow.',
-        'swap_active':   '💾 Swap active: {used:.2f} GB used — Linux is optimizing memory.',
-        'disk_critical': '🚨 Disk almost full: only {free:.1f} GB left on {total:.0f} GB — urgent!',
-        'disk_warning':  '⚠️  Disk at {pct:.0f}%: only {free:.1f} GB free — cleanup recommended.',
-        'disk_moderate': '💿 Disk at {pct:.0f}% used — {free:.1f} GB available, keep an eye on it.',
-        'disk_ok':       '✅ Disk OK: {free:.1f} GB free on {total:.0f} GB ({pct:.0f}% used).',
-        'disk_filling':  '📈 Disk filling up: will be full in {hours:.1f} hours at current rate.',
-        'net_heavy':     '📡 High network traffic: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s — check downloads.',
-        'net_active':    '🌐 Network active: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s',
-        'net_quiet':     '✅ Network quiet: ↓ {recv:.1f} KB/s — ↑ {sent:.1f} KB/s',
-        'net_total':     '📊 Total traffic (since boot): ↓ {recv:.2f} GB received — ↑ {sent:.2f} GB sent',
-        'temp_critical': '🌡️  {label}: {t:.0f}°C — CRITICAL! Thermal throttling risk.',
-        'temp_warning':  '🌡️  {label}: {t:.0f}°C — Getting warm, check cooling.',
-        'uptime_long':   '⏰ Uptime: {dur} — system running very long, a reboot may help.',
-        'uptime_week':   '⏰ Uptime: {dur} — stable system, running for over a week.',
-        'uptime_ok':     '⏰ Uptime: {dur} — freshly started.',
-        'proc_header':   '🔍 Top {n} RAM-hungry processes:',
-        'proc_suggest':  '💡 Tip: {name} has been using {ram} for {dur} — restarting it could free memory.',
-        'health_excellent': '✨ System Health: {score}/100 — Excellent, running optimally',
-        'health_good': '💚 System Health: {score}/100 — Good, minor issues',
-        'health_fair': '💛 System Health: {score}/100 — Fair, attention needed',
-        'health_poor': '❌ System Health: {score}/100 — Poor, critical action required',
+        'cpu_critical':  ' CPU saturated at {pct:.0f}% — system is under extreme pressure.',
+        'cpu_warning':   ' CPU loaded at {pct:.0f}% — performance starting to degrade.',
+        'cpu_moderate':  ' CPU active at {pct:.0f}% — moderate load, all good.',
+        'cpu_ok':        ' CPU quiet at {pct:.0f}% — your machine is breathing easy.',
+        'cpu_hot_cores': '  Overloaded cores: {cores} — unbalanced load.',
+        'cpu_freq':      '  CPU frequency: {cur:.0f} MHz (max {mx:.0f} MHz)',
+        'ram_critical':  ' RAM critical: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — freeze risk!',
+        'ram_warning':   '  RAM under pressure: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — close some apps.',
+        'ram_moderate':  ' RAM at {pct:.0f}%: {used:.1f} GB used out of {total:.1f} GB — normal usage.',
+        'ram_ok':        ' RAM comfortable: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — plenty of headroom.',
+        'swap_heavy':    ' Swap heavily used: {used:.1f} GB / {total:.1f} GB — disk compensating RAM, system slow.',
+        'swap_active':   ' Swap active: {used:.2f} GB used — Linux is optimizing memory.',
+        'disk_critical': ' Disk almost full: only {free:.1f} GB left on {total:.0f} GB — urgent!',
+        'disk_warning':  '  Disk at {pct:.0f}%: only {free:.1f} GB free — cleanup recommended.',
+        'disk_moderate': ' Disk at {pct:.0f}% used — {free:.1f} GB available, keep an eye on it.',
+        'disk_ok':       ' Disk OK: {free:.1f} GB free on {total:.0f} GB ({pct:.0f}% used).',
+        'disk_filling':  ' Disk filling up: will be full in {hours:.1f} hours at current rate.',
+        'net_heavy':     ' High network traffic: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s — check downloads.',
+        'net_active':    ' Network active: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s',
+        'net_quiet':     ' Network quiet: ↓ {recv:.1f} KB/s — ↑ {sent:.1f} KB/s',
+        'net_total':     ' Total traffic (since boot): ↓ {recv:.2f} GB received — ↑ {sent:.2f} GB sent',
+        'temp_critical': '  {label}: {t:.0f}°C — CRITICAL! Thermal throttling risk.',
+        'temp_warning':  '  {label}: {t:.0f}°C — Getting warm, check cooling.',
+        'uptime_long':   ' Uptime: {dur} — system running very long, a reboot may help.',
+        'uptime_week':   ' Uptime: {dur} — stable system, running for over a week.',
+        'uptime_ok':     ' Uptime: {dur} — freshly started.',
+        'proc_header':   ' Top {n} RAM-hungry processes:',
+        'proc_suggest':  ' Tip: {name} has been using {ram} for {dur} — restarting it could free memory.',
+        'health_excellent': ' System Health: {score}/100 — Excellent, running optimally',
+        'health_good': ' System Health: {score}/100 — Good, minor issues',
+        'health_fair': ' System Health: {score}/100 — Fair, attention needed',
+        'health_poor': ' System Health: {score}/100 — Poor, critical action required',
+        'env_info': '  OS: {os_name} | Kernel: {kernel} ({arch}) | Desktop: {desktop}',
+        'tasks_summary': ' Tasks: {total} total, {running} running, {sleeping} sleeping, {threads} threads',
+        'tasks_zombies_alert': '  Zombie processes detected ({count} zombie(s), PIDs: {pids}) — Parent process failed to wait on children.',
+        'tasks_dstate_alert': ' Uninterruptible sleep (D-state) detected ({count} process(es), PIDs: {pids}) — Blocked on disk/NFS I/O hang!',
+        'load_saturation_ok': '  Load: {load1:.2f}, {load5:.2f}, {load15:.2f} — {sat:.0f}% capacity on {cores} cores (balanced)',
+        'load_saturation_warn': '  High load saturation: {sat:.0f}% on {cores} cores (Load 1m: {load1:.2f}) — Processes queueing for CPU.',
+        'battery_status': ' Battery: {pct:.0f}% ({state}) — {time_str}',
+        'io_rates': ' Disk I/O throughput: Read {read_rate:.1f} MB/s — Write {write_rate:.1f} MB/s',
     },
     'fr': {
-        'cpu_critical':  '🔥 CPU saturé à {pct:.0f}% — le système est sous pression extrême.',
-        'cpu_warning':   '⚡ CPU chargé à {pct:.0f}% — les performances commencent à se dégrader.',
-        'cpu_moderate':  '💻 CPU actif à {pct:.0f}% — charge modérée, tout va bien.',
-        'cpu_ok':        '✅ CPU tranquille à {pct:.0f}% — votre machine respire.',
-        'cpu_hot_cores': '🌡️  Cores en surchauffe : {cores} — charge déséquilibrée.',
-        'cpu_freq':      '⚙️  Fréquence CPU : {cur:.0f} MHz (max {mx:.0f} MHz)',
-        'ram_critical':  '🚨 RAM critique : {used:.1f} Go / {total:.1f} Go ({pct:.0f}%) — risque de freeze !',
-        'ram_warning':   '⚠️  RAM sous pression : {used:.1f} Go / {total:.1f} Go ({pct:.0f}%) — fermez des apps.',
-        'ram_moderate':  '📊 RAM à {pct:.0f}% : {used:.1f} Go utilisés sur {total:.1f} Go — usage normal.',
-        'ram_ok':        '✅ RAM confortable : {used:.1f} Go / {total:.1f} Go ({pct:.0f}%) — beaucoup de marge.',
-        'swap_heavy':    '💾 Swap très utilisé : {used:.1f} Go / {total:.1f} Go — disque compense RAM, système lent.',
-        'swap_active':   '💾 Swap actif : {used:.2f} Go utilisés — Linux optimise la mémoire.',
-        'disk_critical': '🚨 Disque presque plein : {free:.1f} Go restants sur {total:.0f} Go — urgence !',
-        'disk_warning':  '⚠️  Disque à {pct:.0f}% : seulement {free:.1f} Go libres — nettoyage recommandé.',
-        'disk_moderate': '💿 Disque à {pct:.0f}% utilisé — {free:.1f} Go disponibles, surveillez.',
-        'disk_ok':       '✅ Disque OK : {free:.1f} Go libres sur {total:.0f} Go ({pct:.0f}% utilisé).',
-        'disk_filling':  '📈 Disque se remplit : sera plein dans {hours:.1f}h au rythme actuel.',
-        'net_heavy':     '📡 Trafic réseau élevé : ↓ {recv:.0f} Ko/s — ↑ {sent:.0f} Ko/s — vérifiez les téléchargements.',
-        'net_active':    '🌐 Réseau actif : ↓ {recv:.0f} Ko/s — ↑ {sent:.0f} Ko/s',
-        'net_quiet':     '✅ Réseau calme : ↓ {recv:.1f} Ko/s — ↑ {sent:.1f} Ko/s',
-        'net_total':     '📊 Trafic total (depuis boot) : ↓ {recv:.2f} Go reçus — ↑ {sent:.2f} Go envoyés',
-        'temp_critical': '🌡️  {label} : {t:.0f}°C — CRITIQUE ! Risque de throttling thermique.',
-        'temp_warning':  '🌡️  {label} : {t:.0f}°C — Ça chauffe, vérifiez le refroidissement.',
-        'uptime_long':   '⏰ Uptime : {dur} — machine allumée très longtemps, redémarrage conseillé.',
-        'uptime_week':   '⏰ Uptime : {dur} — système stable depuis plus d\'une semaine.',
-        'uptime_ok':     '⏰ Uptime : {dur} — démarré récemment.',
-        'proc_header':   '🔍 Top {n} processus les plus gourmands en RAM :',
-        'proc_suggest':  '💡 Suggestion : {name} consomme {ram} depuis {dur} — redémarrer pourrait libérer de la mémoire.',
-        'health_excellent': '✨ Santé du système : {score}/100 — Excellent, optimal',
-        'health_good': '💚 Santé du système : {score}/100 — Bon, problèmes mineurs',
-        'health_fair': '💛 Santé du système : {score}/100 — Acceptable, attention requise',
-        'health_poor': '❌ Santé du système : {score}/100 — Mauvais, action critique.',
+        'cpu_critical':  ' CPU saturé à {pct:.0f}% — le système est sous pression extrême.',
+        'cpu_warning':   ' CPU chargé à {pct:.0f}% — les performances commencent à se dégrader.',
+        'cpu_moderate':  ' CPU actif à {pct:.0f}% — charge modérée, tout va bien.',
+        'cpu_ok':        ' CPU tranquille à {pct:.0f}% — votre machine respire.',
+        'cpu_hot_cores': '  Cores en surchauffe : {cores} — charge déséquilibrée.',
+        'cpu_freq':      '  Fréquence CPU : {cur:.0f} MHz (max {mx:.0f} MHz)',
+        'ram_critical':  ' RAM critique : {used:.1f} Go / {total:.1f} Go ({pct:.0f}%) — risque de freeze !',
+        'ram_warning':   '  RAM sous pression : {used:.1f} Go / {total:.1f} Go ({pct:.0f}%) — fermez des apps.',
+        'ram_moderate':  ' RAM à {pct:.0f}% : {used:.1f} Go utilisés sur {total:.1f} Go — usage normal.',
+        'ram_ok':        ' RAM confortable : {used:.1f} Go / {total:.1f} Go ({pct:.0f}%) — beaucoup de marge.',
+        'swap_heavy':    ' Swap très utilisé : {used:.1f} Go / {total:.1f} Go — disque compense RAM, système lent.',
+        'swap_active':   ' Swap actif : {used:.2f} Go utilisés — Linux optimise la mémoire.',
+        'disk_critical': ' Disque presque plein : {free:.1f} Go restants sur {total:.0f} Go — urgence !',
+        'disk_warning':  '  Disque à {pct:.0f}% : seulement {free:.1f} Go libres — nettoyage recommandé.',
+        'disk_moderate': ' Disque à {pct:.0f}% utilisé — {free:.1f} Go disponibles, surveillez.',
+        'disk_ok':       ' Disque OK : {free:.1f} Go libres sur {total:.0f} Go ({pct:.0f}% utilisé).',
+        'disk_filling':  ' Disque se remplit : sera plein dans {hours:.1f}h au rythme actuel.',
+        'net_heavy':     ' Trafic réseau élevé : ↓ {recv:.0f} Ko/s — ↑ {sent:.0f} Ko/s — vérifiez les téléchargements.',
+        'net_active':    ' Réseau actif : ↓ {recv:.0f} Ko/s — ↑ {sent:.0f} Ko/s',
+        'net_quiet':     ' Réseau calme : ↓ {recv:.1f} Ko/s — ↑ {sent:.1f} Ko/s',
+        'net_total':     ' Trafic total (depuis boot) : ↓ {recv:.2f} Go reçus — ↑ {sent:.2f} Go envoyés',
+        'temp_critical': '  {label} : {t:.0f}°C — CRITIQUE ! Risque de throttling thermique.',
+        'temp_warning':  '  {label} : {t:.0f}°C — Ça chauffe, vérifiez le refroidissement.',
+        'uptime_long':   ' Uptime : {dur} — machine allumée très longtemps, redémarrage conseillé.',
+        'uptime_week':   ' Uptime : {dur} — système stable depuis plus d\'une semaine.',
+        'uptime_ok':     ' Uptime : {dur} — démarré récemment.',
+        'proc_header':   ' Top {n} processus les plus gourmands en RAM :',
+        'proc_suggest':  ' Suggestion : {name} consomme {ram} depuis {dur} — redémarrer pourrait libérer de la mémoire.',
+        'health_excellent': ' Santé du système : {score}/100 — Excellent, optimal',
+        'health_good': ' Santé du système : {score}/100 — Bon, problèmes mineurs',
+        'health_fair': ' Santé du système : {score}/100 — Acceptable, attention requise',
+        'health_poor': ' Santé du système : {score}/100 — Mauvais, action critique.',
+        'env_info': '  Système : {os_name} | Kernel : {kernel} ({arch}) | Bureau : {desktop}',
+        'tasks_summary': ' Tâches : {total} au total, {running} active(s), {sleeping} en veille, {threads} threads',
+        'tasks_zombies_alert': '  Processus zombies détectés ({count} zombie(s), PIDs : {pids}) — Le processus parent n\'a pas récupéré ses enfants.',
+        'tasks_dstate_alert': ' Veille ininterruptible (état D) détectée ({count} processus, PIDs : {pids}) — Bloqué sur I/O disque ou blocage matériel !',
+        'load_saturation_ok': '  Charge : {load1:.2f}, {load5:.2f}, {load15:.2f} — {sat:.0f}% de capacité sur {cores} cœurs (équilibrée)',
+        'load_saturation_warn': '  Saturation de charge élevée : {sat:.0f}% sur {cores} cœurs (Charge 1m : {load1:.2f}) — Des processus attendent le CPU.',
+        'battery_status': ' Batterie : {pct:.0f}% ({state}) — {time_str}',
+        'io_rates': ' Débit I/O disque : Lecture {read_rate:.1f} Mo/s — Écriture {write_rate:.1f} Mo/s',
     },
     'ar': {
-        'cpu_critical':  '🔥 وحدة المعالجة مثقلة بنسبة {pct:.0f}% — النظام تحت ضغط شديد.',
-        'cpu_warning':   '⚡ المعالج محمل بنسبة {pct:.0f}% — الأداء يبدأ في التراجع.',
-        'cpu_moderate':  '💻 المعالج نشط بنسبة {pct:.0f}% — حمل معتدل، كل شيء بخير.',
-        'cpu_ok':        '✅ المعالج هادئ بنسبة {pct:.0f}% — جهازك يعمل بارتياح.',
-        'cpu_hot_cores': '🌡️  أنوية ساخنة: {cores} — حمل غير متوازن.',
-        'cpu_freq':      '⚙️  تردد المعالج: {cur:.0f} ميغاهرتز (الحد الأقصى {mx:.0f})',
-        'ram_critical':  '🚨 ذاكرة RAM حرجة: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — خطر التجميد!',
-        'ram_warning':   '⚠️  ذاكرة RAM تحت ضغط: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — أغلق تطبيقات.',
-        'ram_moderate':  '📊 ذاكرة RAM بنسبة {pct:.0f}%: {used:.1f} GB من {total:.1f} GB — استخدام طبيعي.',
-        'ram_ok':        '✅ ذاكرة RAM مريحة: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — مساحة كافية.',
-        'swap_heavy':    '💾 Swap مستخدم بكثافة: {used:.1f} GB / {total:.1f} GB — القرص يعوض RAM.',
-        'swap_active':   '💾 Swap نشط: {used:.2f} GB مستخدم — Linux يحسّن الذاكرة.',
-        'disk_critical': '🚨 القرص شبه ممتلئ: {free:.1f} GB فقط من {total:.0f} GB — عاجل!',
-        'disk_warning':  '⚠️  القرص بنسبة {pct:.0f}%: {free:.1f} GB فقط متاح — يُنصح بالتنظيف.',
-        'disk_moderate': '💿 القرص بنسبة {pct:.0f}% مستخدم — {free:.1f} GB متاح.',
-        'disk_ok':       '✅ القرص بخير: {free:.1f} GB متاح من {total:.0f} GB ({pct:.0f}% مستخدم).',
-        'disk_filling':  '📈 القرص يمتلئ: سيكون ممتلئاً خلال {hours:.1f}س.',
-        'net_heavy':     '📡 حركة شبكة عالية: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s',
-        'net_active':    '🌐 الشبكة نشطة: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s',
-        'net_quiet':     '✅ الشبكة هادئة: ↓ {recv:.1f} KB/s — ↑ {sent:.1f} KB/s',
-        'net_total':     '📊 إجمالي البيانات: ↓ {recv:.2f} GB مستلمة — ↑ {sent:.2f} GB مرسلة',
-        'temp_critical': '🌡️  {label}: {t:.0f}°م — خطر! خطر الاختناق الحراري.',
-        'temp_warning':  '🌡️  {label}: {t:.0f}°م — يسخن، تحقق من التبريد.',
-        'uptime_long':   '⏰ وقت التشغيل: {dur} — الجهاز يعمل منذ وقت طويل، أعد التشغيل.',
-        'uptime_week':   '⏰ وقت التشغيل: {dur} — نظام مستقر منذ أكثر من أسبوع.',
-        'uptime_ok':     '⏰ وقت التشغيل: {dur} — تم التشغيل مؤخراً.',
-        'proc_header':   '🔍 أكثر {n} عمليات استهلاكاً للذاكرة:',
-        'proc_suggest':  '💡 نصيحة: {name} يستهلك {ram} منذ {dur} — إعادة تشغيله قد يحرر الذاكرة.',
-        'health_excellent': '✨ صحة النظام: {score}/100 — ممتاز، يعمل بكفاءة',
-        'health_good': '💚 صحة النظام: {score}/100 — جيد، مشاكل بسيطة',
-        'health_fair': '💛 صحة النظام: {score}/100 — مقبول، يحتاج انتباه',
-        'health_poor': '❌ صحة النظام: {score}/100 — سيء، إجراء حرج مطلوب',
+        'cpu_critical':  ' وحدة المعالجة مثقلة بنسبة {pct:.0f}% — النظام تحت ضغط شديد.',
+        'cpu_warning':   ' المعالج محمل بنسبة {pct:.0f}% — الأداء يبدأ في التراجع.',
+        'cpu_moderate':  ' المعالج نشط بنسبة {pct:.0f}% — حمل معتدل، كل شيء بخير.',
+        'cpu_ok':        ' المعالج هادئ بنسبة {pct:.0f}% — جهازك يعمل بارتياح.',
+        'cpu_hot_cores': '  أنوية ساخنة: {cores} — حمل غير متوازن.',
+        'cpu_freq':      '  تردد المعالج: {cur:.0f} ميغاهرتز (الحد الأقصى {mx:.0f})',
+        'ram_critical':  ' ذاكرة RAM حرجة: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — خطر التجميد!',
+        'ram_warning':   '  ذاكرة RAM تحت ضغط: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — أغلق تطبيقات.',
+        'ram_moderate':  ' ذاكرة RAM بنسبة {pct:.0f}%: {used:.1f} GB من {total:.1f} GB — استخدام طبيعي.',
+        'ram_ok':        ' ذاكرة RAM مريحة: {used:.1f} GB / {total:.1f} GB ({pct:.0f}%) — مساحة كافية.',
+        'swap_heavy':    ' Swap مستخدم بكثافة: {used:.1f} GB / {total:.1f} GB — القرص يعوض RAM.',
+        'swap_active':   ' Swap نشط: {used:.2f} GB مستخدم — Linux يحسّن الذاكرة.',
+        'disk_critical': ' القرص شبه ممتلئ: {free:.1f} GB فقط من {total:.0f} GB — عاجل!',
+        'disk_warning':  '  القرص بنسبة {pct:.0f}%: {free:.1f} GB فقط متاح — يُنصح بالتنظيف.',
+        'disk_moderate': ' القرص بنسبة {pct:.0f}% مستخدم — {free:.1f} GB متاح.',
+        'disk_ok':       ' القرص بخير: {free:.1f} GB متاح من {total:.0f} GB ({pct:.0f}% مستخدم).',
+        'disk_filling':  ' القرص يمتلئ: سيكون ممتلئاً خلال {hours:.1f}س.',
+        'net_heavy':     ' حركة شبكة عالية: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s',
+        'net_active':    ' الشبكة نشطة: ↓ {recv:.0f} KB/s — ↑ {sent:.0f} KB/s',
+        'net_quiet':     ' الشبكة هادئة: ↓ {recv:.1f} KB/s — ↑ {sent:.1f} KB/s',
+        'net_total':     ' إجمالي البيانات: ↓ {recv:.2f} GB مستلمة — ↑ {sent:.2f} GB مرسلة',
+        'temp_critical': '  {label}: {t:.0f}°م — خطر! خطر الاختناق الحراري.',
+        'temp_warning':  '  {label}: {t:.0f}°م — يسخن، تحقق من التبريد.',
+        'uptime_long':   ' وقت التشغيل: {dur} — الجهاز يعمل منذ وقت طويل، أعد التشغيل.',
+        'uptime_week':   ' وقت التشغيل: {dur} — نظام مستقر منذ أكثر من أسبوع.',
+        'uptime_ok':     ' وقت التشغيل: {dur} — تم التشغيل مؤخراً.',
+        'proc_header':   ' أكثر {n} عمليات استهلاكاً للذاكرة:',
+        'proc_suggest':  ' نصيحة: {name} يستهلك {ram} منذ {dur} — إعادة تشغيله قد يحرر الذاكرة.',
+        'health_excellent': ' صحة النظام: {score}/100 — ممتاز، يعمل بكفاءة',
+        'health_good': ' صحة النظام: {score}/100 — جيد، مشاكل بسيطة',
+        'health_fair': ' صحة النظام: {score}/100 — مقبول، يحتاج انتباه',
+        'health_poor': ' صحة النظام: {score}/100 — سيء، إجراء حرج مطلوب',
+        'env_info': '  النظام: {os_name} | النواة: {kernel} ({arch}) | الواجهة: {desktop}',
+        'tasks_summary': ' المهام: {total} إجمالي، {running} نشطة، {sleeping} خاملة، {threads} خيوط',
+        'tasks_zombies_alert': '  تم اكتشاف عمليات زومبي ({count}، PIDs: {pids}) — العملية الأم لم تنظف مخرجاتها.',
+        'tasks_dstate_alert': ' سكون غير قابل للمقاطعة (حالة D) مكتشفة ({count} عملية، PIDs: {pids}) — معلقة على إدخال/إخراج القرص!',
+        'load_saturation_ok': '  الحمل: {load1:.2f}، {load5:.2f}، {load15:.2f} — {sat:.0f}% من السعة على {cores} أنوية (متوازن)',
+        'load_saturation_warn': '  تشبع حمل مرتفع: {sat:.0f}% على {cores} أنوية (الحمل: {load1:.2f}) — العمليات تنتظر المعالج.',
+        'battery_status': ' البطارية: {pct:.0f}% ({state}) — {time_str}',
+        'io_rates': ' معدل سرعة القرص: قراءة {read_rate:.1f} م.ب/ث — كتابة {write_rate:.1f} م.ب/ث',
     },
 }
+

@@ -1,12 +1,12 @@
 <div align="center">
 
-```
-███████╗██╗   ██╗███████╗███╗   ██╗ █████╗ ██████╗ ██████╗  █████╗ ████████╗ ██████╗ ██████╗
-██╔════╝╚██╗ ██╔╝██╔════╝████╗  ██║██╔══██╗██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██╔═══██╗██╔══██╗
-███████╗ ╚████╔╝ ███████╗██╔██╗ ██║███████║██████╔╝██████╔╝███████║   ██║   ██║   ██║██████╔╝
-╚════██║  ╚██╔╝  ╚════██║██║╚██╗██║██╔══██║██╔══██╗██╔══██╗██╔══██║   ██║   ██║   ██║██╔══██╗
-███████║   ██║   ███████║██║ ╚████║██║  ██║██║  ██║██║  ██║██║  ██║   ██║   ╚██████╔╝██║  ██║
-╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
+```text
+   _____             _   __                           __            
+  / ___/__  _______ / | / /___ _____________ _____ _/ /_____  _____
+  \__ \/ / / / ___//  |/ / __ `/ ___/ ___/ __ `/ __/ __/ __ \/ ___/
+ ___/ / /_/ (__  )/ /|  / /_/ / /  / /  / /_/ / / / /_/ /_/ / /    
+/____/\__, /____//_/ |_/\__,_/_/  /_/   \__,_/_/  \__/\____/_/     
+     /____/                                                        
 ```
 
 **Your Linux system, in plain human language.**
@@ -24,62 +24,89 @@
 
 ---
 
+## Overview
+
+![SysNarrator Command Center](docs/screenshots/overview.svg)
+
 ## Why SysNarrator?
 
-Every Linux tool — `htop`, `top`, `vmstat`, `iostat` — throws **raw numbers** at you.  
-You need to **already know** what those numbers mean to act on them.
+Standard terminal monitors throw walls of raw metrics at you.
+**SysNarrator is an Observability Command Center that talks**: it understands the context, predicts failure modes, and gives you actionable copyable remediation commands.
 
-**SysNarrator is different.**  
-It observes your system, understands the context, and tells you **exactly what's happening and what to do** — in plain language. No jargon. No guessing.
-
-| Classic tools | SysNarrator |
-|---|---|
-| `CPU: 87%` | `CPU saturé à 87% — Firefox + VSCode en sont la cause principale` |
-| `MEM: 7.2G / 8G` | `RAM critique (90%) — Slack tourne depuis 6h et fuit de la mémoire` |
-| `/dev/sda1: 91%` | `Disque à 91% — ~/.cache représente 12 Go, nettoyable facilement` |
+| Capability | Standard Monitors | SysNarrator |
+|---|:---:|:---:|
+| **Plain-Language Narration** (EN / FR / AR) | ❌ | ✅ Real-time narrative story |
+| **Health Score (0-100)** with Explainable Penalties | ❌ | ✅ Itemized health breakdown |
+| **Actionable Remediation Commands** | ❌ | ✅ Copyable safe commands (`journalctl`, `rm -rf cache`) |
+| **Memory Leak Slope Detection** | ❌ | ✅ Linear regression MB/min growth |
+| **Disk Exhaustion Forecast** | ❌ | ✅ Predictive ETA calculation |
+| **Root-Cause Analysis** (D-State I/O / Zombies) | ❌ | ✅ Instant root-cause pinpointer |
+| **Grouped Application Footprint** | ❌ | ✅ Multi-process aggregation (Brave, Chrome, IDEs) |
+| **High-Density Braille Area Charts** | Optional | ✅ Real-time 2x4 sub-pixel vector charts |
+| **Multi-Core Heatmap Strip** | ❌ | ✅ Colored per-core load blocks |
 
 ---
 
 ## Features
 
 - **Human narration** — Every metric becomes a meaningful sentence
-- **Process history** — Tracks how long each app has been running and consuming
-- **Smart suggestions** — Actionable tips, not just observations
-- **Temperature monitoring** — With thermal alerts before damage
-- **Network in plain words** — Real-time + session totals
+- **Full Linux background** — Distro name, kernel, desktop environment, and architecture
+- **Advanced task accounting** — Tasks count, running threads, and automatic zombie / D-state process detection
+- **Load saturation vs core count** — True capacity calculation across logical/physical cores
+- **Disk I/O throughput** — Real-time read and write rates in MB/s
+- **Process history & memory leak detection** — Tracks runtime and calculates leak probability scores
+- **Predictive disk exhaustion** — Hours-until-full countdown based on trend extrapolation
+- **Battery & power monitoring** — Health, charging state, and remaining runtime
+- **Smart suggestions** — Actionable tips and exact commands, not just observations
+- **Temperature monitoring** — Thermal sensors with throttling alerts
 - **Multi-format output** — Terminal (colored), JSON, plain text
 - **Watch mode** — Live dashboard, refreshes every N seconds
-- **Multi-language** — English, Français, العربية (and more via contributions)
-- **Zero bloat** — Only depends on `psutil`, nothing else
-- **Docker support** — Run in containers too
+- **Multi-language** — English, Français, العربية
 
 ---
 
-## Screenshots
+## Example Output
 
-```
-╔══════════════════════════════════════════════════════════╗
-║           SysNarrator  •  14:32:05  •  ubuntu-pc         ║
-╠══════════════════════════════════════════════════════════╣
-║  CPU                                                     ║
-║  CPU tranquille à 18% — votre machine respire.           ║
-║  Fréquence : 1800 MHz / 4200 MHz max                     ║
-║                                                          ║
-║  RAM                                                     ║
-║  RAM sous pression : 6.1 Go / 8 Go (76%)                 ║
-║     → Fermez des applications pour libérer de l'espace   ║
-║                                                          ║
-║  Disque                                                  ║
-║  Disque OK : 45 Go libres sur 256 Go (82% utilisé)       ║
-║                                                          ║
-║  Réseau                                                  ║
-║  Réseau actif : ↓ 248 Ko/s — ↑ 12 Ko/s                   ║
-║                                                          ║
-║  Top Processus                                           ║
-║  1. firefox        (PID  2341)  → 2.1 Go RAM depuis 4h   ║
-║  Firefox consomme beaucoup — redémarrer libèrerait       ║
-║     de la mémoire.                                       ║
-╚══════════════════════════════════════════════════════════╝
+```text
+════════════════════════════════════════════════════════════════════
+  SysNarrator v0.1.0  •  14:32:05  •  ubuntu-workstation
+  Ubuntu 24.04 LTS  •  Linux 6.8.0-45-generic
+  Tasks: 284 total, 2 run, 0 zombie  •  Load: 0.45 0.52 0.48 [11%]
+════════════════════════════════════════════════════════════════════
+
+  CPU      [████░░░░░░░░░░░░░░░░░░░░░]  18.0%
+  Mem      [███████████████████░░░░░░]  76.0%
+  Swp      [██░░░░░░░░░░░░░░░░░░░░░░░]   6.5%
+  Dsk      [████████████████░░░░░░░░░]  82.0%
+
+  [SYSTEM]
+  System Health: 92/100 — Excellent, running optimally
+  OS: Ubuntu 24.04 LTS | Kernel: 6.8.0-45-generic (x86_64) | Desktop: GNOME
+  Load: 0.45, 0.52, 0.48 — 11% capacity on 4 cores (balanced)
+  Tasks: 284 total, 2 running, 282 sleeping, 892 threads
+
+  [UPTIME]
+  System running for 2 days, 14 hours
+
+  [CPU]
+  CPU tranquille a 18% — votre machine respire.
+  Frequence : 1800 MHz / 4200 MHz max
+
+  [RAM]
+  RAM sous pression : 6.1 Go / 8.0 Go (76%)
+  → Fermez des applications pour liberer de l'espace
+
+  [DISK]
+  Disque OK : 45 Go libres sur 256 Go (82% utilise)
+  Disk I/O throughput: Read 12.4 MB/s — Write 3.1 MB/s
+
+  [NETWORK]
+  Reseau actif : ↓ 248 Ko/s — ↑ 12 Ko/s
+
+  [PROCESSES]
+  1. firefox        (PID  2341)  → 2.1 Go RAM depuis 4h
+  2. code           (PID  8912)  → 1.4 Go RAM depuis 2h | CPU 24%
+  Firefox consomme beaucoup — redemarrer libererait de la memoire.
 ```
 
 ---
@@ -109,8 +136,8 @@ sysnarrator
 # Watch mode (updates every 2 seconds)
 sysnarrator --watch
 
-# Professional analysis (with health score)
-python -m sysnarrator.professional_cli
+# Detailed report (with health score)
+python -m sysnarrator.report_cli
 
 # Export as JSON
 sysnarrator --json > system_report.json
@@ -125,8 +152,7 @@ sysnarrator --no-color
 
 - **[GETTING_STARTED.md](GETTING_STARTED.md)** — Installation & first steps
 - **[USER_GUIDE.md](USER_GUIDE.md)** — Complete feature guide
-- **[PROFESSIONAL.md](PROFESSIONAL.md)** — Professional analysis features
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Project architecture
+- **[REPORT.md](REPORT.md)** — Detailed report guide
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — How to contribute
 
 ### Run
@@ -225,54 +251,6 @@ sysnarrator --lang en   # English (default)
 ```
 
 To add a new language, copy `sysnarrator/i18n/en.json` and translate it. Then open a PR!
-
----
-
-## Project Structure
-
-```
-sysnarrator/
-├── sysnarrator/
-│   ├── __init__.py          # Package init
-│   ├── __main__.py          # Entry point (python -m sysnarrator)
-│   ├── cli.py               # Argument parser & main runner
-│   ├── narrator.py          # Core narration engine
-│   ├── collectors/
-│   │   ├── cpu.py           # CPU metrics collector
-│   │   ├── memory.py        # RAM & swap collector
-│   │   ├── disk.py          # Disk usage & I/O collector
-│   │   ├── network.py       # Network I/O collector
-│   │   ├── processes.py     # Process tracker with history
-│   │   └── temperature.py   # Thermal sensors collector
-│   ├── formatters/
-│   │   ├── terminal.py      # Colored terminal output
-│   │   ├── json_fmt.py      # JSON formatter
-│   │   └── plain.py         # Plain text formatter
-│   └── i18n/
-│       ├── en.json          # English messages
-│       ├── fr.json          # French messages
-│       └── ar.json          # Arabic messages
-├── tests/
-│   ├── test_narrator.py
-│   ├── test_collectors.py
-│   └── test_formatters.py
-├── docs/
-│   ├── ARCHITECTURE.md
-│   └── CONTRIBUTING_TRANSLATIONS.md
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml           # Run tests on push
-│   │   └── release.yml      # Auto-publish to PyPI
-│   └── ISSUE_TEMPLATE/
-│       ├── bug_report.md
-│       └── feature_request.md
-├── README.md
-├── CONTRIBUTING.md
-├── CHANGELOG.md
-├── LICENSE
-├── pyproject.toml
-└── setup.cfg
-```
 
 ---
 

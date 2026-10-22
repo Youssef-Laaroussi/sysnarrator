@@ -11,54 +11,54 @@ CPU: 87% | RAM: 7.2/8GB | Disk: 91%
 You get:
 ```
 SYSTEM HEALTH SCORE: 72/100 - FAIR
-├─ ⚠️ CPU saturated at 87%
-├─ 🚨 RAM at 90% (using swap = 100x slower)
-└─ 💡 Recommendations: Close Firefox tabs, disable animations, upgrade RAM
+├─  CPU saturated at 87%
+├─  RAM at 90% (using swap = 100x slower)
+└─  Recommendations: Close Firefox tabs, disable animations, upgrade RAM
 ```
 
 ---
 
-## 🎯 Key Features
+##  Key Features
 
-### 🔧 **Professional Analysis**
+###  **Professional Analysis**
 - **System Health Score** (0-100) for quick assessment
 - **Expert Diagnosis** with root cause analysis
 - **Detailed Metrics** with visual health bars
 - **Top Processes** analysis with memory leak detection
 - **Smart Recommendations** for optimization
 
-### 💡 **Expert Explanations**
+###  **Expert Explanations**
 - Why your system is slow
 - What's consuming resources
 - How to fix problems (step-by-step)
 - Ubuntu-specific optimization tips
 
-### 🎨 **Professional Design**
+###  **Professional Design**
 - Modern color scheme (Orange, Blue, Green, Red)
 - Clean, readable output with visual hierarchies
 - Progress bars and health indicators
 - No unnecessary clutter
 
-### 🌍 **Multi-Language**
+###  **Multi-Language**
 - **English** — Full analysis and recommendations
 - **French (Français)** — Complete expert analysis
 - **Arabic (العربية)** — Full support
 
 ---
 
-## 📦 Installation
+##  Installation
 
 ### Using a virtual environment
 
 ```bash
-cd /home/youssef/sysnarrator
+cd sysnarrator
 source venv/bin/activate
 pip install -e .
 ```
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Basic Professional Report
 
@@ -98,7 +98,7 @@ sysnarrator --no-color > system_report.txt
 sysnarrator --top 10
 ```
 
-### Live Dashboard (HTOP-style)
+### Live Dashboard (Interactive Monitor)
 
 ```bash
 sysnarrator --watch --interval 2
@@ -106,17 +106,17 @@ sysnarrator --watch --interval 2
 
 ---
 
-## 📊 Understanding the Report
+##  Understanding the Report
 
 ### System Health Score
 
 | Score | Status | Meaning |
 |-------|--------|---------|
-| 90-100 | 🟢 EXCELLENT | System running perfectly |
-| 75-89 | 🟢 GOOD | Minor optimizations possible |
-| 60-74 | 🟡 FAIR | Some attention recommended |
-| 40-59 | 🟠 POOR | Multiple issues to address |
-| 0-39 | 🔴 CRITICAL | Immediate action needed |
+| 90-100 |  EXCELLENT | System running perfectly |
+| 75-89 |  GOOD | Minor optimizations possible |
+| 60-74 |  FAIR | Some attention recommended |
+| 40-59 |  POOR | Multiple issues to address |
+| 0-39 |  CRITICAL | Immediate action needed |
 
 **How it's calculated:**
 - CPU usage penalty: -30 (>90%), -15 (>70%)
@@ -156,7 +156,7 @@ When problems are detected:
 
 ---
 
-## 🔧 Advanced Usage
+##  Advanced Usage
 
 ### Continuous Monitoring
 
@@ -181,10 +181,10 @@ sysnarrator --no-color > reports/$(date +%Y-%m-%d_%H-%M-%S).txt
 
 ---
 
-## 📋 Interpreting Analysis
+##  Interpreting Analysis
 
 ### "System running optimally"
-✅ No action needed. Everything is healthy.
+ No action needed. Everything is healthy.
 
 ### Memory Leak Risk
 Detected when a single process uses >1000MB and has been running <1 hour.
@@ -217,7 +217,7 @@ When CPU >80°C, thermal throttling occurs (automatic slowdown).
 
 ---
 
-## 🛠️ Ubuntu Optimization Tips
+##  Ubuntu Optimization Tips
 
 ### Reduce CPU Usage
 
@@ -276,12 +276,12 @@ watch -n 1 sensors
 
 ---
 
-## 📊 Example Reports
+##  Example Reports
 
 ### Healthy System
 ```
 SYSTEM HEALTH SCORE: 95/100 - EXCELLENT
-✓ System running optimally
+ System running optimally
 
 CPU Usage: 22%
 RAM Usage: 38% (7.4GB / 19.4GB)
@@ -294,11 +294,11 @@ Swap Usage: 0%
 SYSTEM HEALTH SCORE: 65/100 - FAIR
 
 Expert Analysis:
-├─ ⚠️  High CPU Usage (>80%)
+├─   High CPU Usage (>80%)
 │   ├─ Cause: Browser with 20+ tabs, VS Code indexing
 │   └─ Solutions: Close tabs, disable extensions
 │
-└─ ⚠️  High RAM Usage (>75%)
+└─   High RAM Usage (>75%)
     ├─ Cause: Slack, Docker containers, Chrome instances
     └─ Solutions: Close unnecessary tabs, stop Docker
 ```
@@ -308,14 +308,14 @@ Expert Analysis:
 SYSTEM HEALTH SCORE: 35/100 - CRITICAL
 
 Expert Analysis:
-├─ 🔴 CPU saturated at 95%
-├─ 🔴 RAM at 92% (using swap = VERY SLOW)
-└─ 🔴 Disk at 98% FULL (system unstable)
+├─  CPU saturated at 95%
+├─  RAM at 92% (using swap = VERY SLOW)
+└─  Disk at 98% FULL (system unstable)
 ```
 
 ---
 
-## 🔗 Integration
+##  Integration
 
 ### With System Monitoring Tools
 
@@ -327,7 +327,7 @@ watch -n 30 'sysnarrator --no-color'
 sysnarrator --no-color >> ~/.local/share/sysnarrator.log
 
 # As cron job (hourly report)
-0 * * * * cd /home/youssef/sysnarrator && source venv/bin/activate && sysnarrator --no-color >> ~/reports/system.log
+0 * * * * cd sysnarrator && source venv/bin/activate && sysnarrator --no-color >> ~/reports/system.log
 ```
 
 ### With Scripts
@@ -349,18 +349,18 @@ fi
 
 ---
 
-## 🎨 Color Scheme
+##  Color Scheme
 
 **Professional Color Palette:**
-- 🟠 **Orange** — CPU bars and emphasis
-- 🔵 **Blue** — Memory/Swap bars and information
-- 🟢 **Green** — OK status and Disk bar
-- 🟡 **Yellow** — Warning severity
-- 🔴 **Red** — Critical severity
+-  **Orange** — CPU bars and emphasis
+-  **Blue** — Memory/Swap bars and information
+-  **Green** — OK status and Disk bar
+-  **Yellow** — Warning severity
+-  **Red** — Critical severity
 
 ---
 
-## 📚 Additional Commands
+##  Additional Commands
 
 ```bash
 # Help
@@ -377,7 +377,7 @@ sysnarrator --no-color
 
 ---
 
-## 🤝 Support & Contribution
+##  Support & Contribution
 
 ### Report Issues
 If you find a bug or inaccuracy in analysis:
@@ -395,7 +395,7 @@ nano sysnarrator/expert_analyzer.py
 
 ---
 
-## 📖 Understanding Linux Performance
+##  Understanding Linux Performance
 
 ### Key Metrics Explained
 
@@ -431,7 +431,7 @@ nano sysnarrator/expert_analyzer.py
 
 ---
 
-## 📝 License
+##  License
 
 MIT License - See LICENSE file for details
 

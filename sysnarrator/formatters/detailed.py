@@ -2,10 +2,9 @@
 import sys
 
 
-class ProfessionalFormatter:
+class DetailedFormatter:
     """
-    Professional system analysis formatter with modern color scheme.
-    Colors: Orange (#FF9500), Blue (#0A84FF), Gray (#5E5CE6), Green (#34C759)
+    Detailed system analysis formatter with clean color scheme.
     """
 
     class Colors:
@@ -80,8 +79,8 @@ class ProfessionalFormatter:
     def format_expert_tip(cls, title, content, no_color=False):
         """Format expert tip/recommendation"""
         if no_color:
-            return f"\n  💡 {title}:\n     {content}"
-        return f"\n  {cls.Colors.ORANGE}{cls.Colors.BOLD}💡 {title}:{cls.Colors.RESET}\n     {cls.Colors.ORANGE}{content}{cls.Colors.RESET}"
+            return f"\n   {title}:\n     {content}"
+        return f"\n  {cls.Colors.ORANGE}{cls.Colors.BOLD} {title}:{cls.Colors.RESET}\n     {cls.Colors.ORANGE}{content}{cls.Colors.RESET}"
 
     @classmethod
     def format_metric(cls, label, value, unit="", level="info", no_color=False):

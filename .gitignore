@@ -22,6 +22,7 @@ venv/
 env/
 .env/
 ENV/
+ysmenv/
 .python-version
 
 # ─── Testing & Coverage ───────────────────────────────

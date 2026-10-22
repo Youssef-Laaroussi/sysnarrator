@@ -1,11 +1,11 @@
 # Contributing to SysNarrator
 
-Thank you for your interest in contributing! 🎉  
+Thank you for your interest in contributing!   
 SysNarrator is a community project and every contribution matters.
 
 ---
 
-## 📋 Table of Contents
+##  Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
 - [How to Contribute](#how-to-contribute)
@@ -27,18 +27,18 @@ Harassment, discrimination, or toxic behavior will not be tolerated.
 
 ## How to Contribute
 
-### 🐛 Found a bug?
+###  Found a bug?
 Open an issue using the **Bug Report** template.  
 Include your OS version, Python version, and steps to reproduce.
 
-### 💡 Have a feature idea?
+###  Have a feature idea?
 Open an issue using the **Feature Request** template.  
 Describe the problem it solves, not just the solution.
 
-### 🌍 Want to translate?
+###  Want to translate?
 See the [Adding a Language](#adding-a-language) section below.
 
-### 💻 Want to write code?
+###  Want to write code?
 1. Look for issues labeled `good first issue` or `help wanted`
 2. Comment on the issue to claim it
 3. Fork, code, test, PR!
@@ -135,4 +135,4 @@ Please include:
 
 ---
 
-Thank you for making SysNarrator better! 💙
+Thank you for making SysNarrator better! 

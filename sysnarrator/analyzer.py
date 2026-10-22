@@ -9,7 +9,7 @@ import time
 
 class SystemExpertAnalyzer:
     """
-    Advanced system analysis with expert recommendations.
+    Advanced system analysis and recommendations.
     Provides detailed explanations in English, French, and Arabic.
     """
 
@@ -329,3 +329,5 @@ class SystemExpertAnalyzer:
 
 # Utility import
 import os
+
+SystemAnalyzer = SystemExpertAnalyzer

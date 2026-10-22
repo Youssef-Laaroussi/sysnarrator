@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.1.0] — 2026-03-13
 
 ### Added
-- 🎉 Initial release
+-  Initial release
 - Core narration engine: CPU, RAM, Disk, Network, Processes, Temperature, Uptime
 - Colored terminal output with severity levels (critical, warning, ok, info)
 - JSON output mode (`--json`)
