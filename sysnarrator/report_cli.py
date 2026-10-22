@@ -9,6 +9,14 @@ import sys
 from datetime import datetime
 from . import __version__
 from .narrator import Narrator
+from .formatters.detailed import DetailedFormatter
+from .analyzer import SystemAnalyzer
+
+
+class ReportCLI:
+    """Command-line interface for system report and analysis"""
+
+    def __init__(self, args):
         self.args = args
         self.narrator = Narrator(lang=args.lang, top_n=args.top)
         self.no_color = args.no_color or not sys.stdout.isatty()
