@@ -9,6 +9,7 @@ import sys
 from datetime import datetime
 from . import __version__
 from .narrator import Narrator
+from .collectors.system_info import SystemInfoCollector
 import psutil
 
 class C:
@@ -88,14 +89,33 @@ def print_header(no_color=False):
     now = datetime.now().strftime("%H:%M:%S")
     hostname = os.uname().nodename
     version = f"v{__version__}"
+
+    try:
+        env = SystemInfoCollector.get_linux_environment()
+        tasks = SystemInfoCollector.get_task_stats()
+        load = SystemInfoCollector.get_load_saturation()
+        os_str = f"{env['os_name']}  •  Linux {env['kernel']}"
+        task_str = f"Tasks: {tasks['total_processes']} total, {tasks['running']} run, {tasks['zombie']} zombie  •  Load: {load['load1']:.2f} {load['load5']:.2f} {load['load15']:.2f} [{load['saturation1_pct']:.0f}%]"
+    except Exception:
+        os_str = "Linux System"
+        task_str = ""
+
+    width = 68
     if no_color:
-        print(f"{'═'*60}")
+        print(f"{'═'*width}")
         print(f"  SysNarrator {version}  •  {now}  •  {hostname}")
-        print(f"{'═'*60}")
+        print(f"  {os_str}")
+        if task_str:
+            print(f"  {task_str}")
+        print(f"{'═'*width}")
     else:
-        print(f"{C.CYAN}{'═'*60}{C.RESET}")
+        print(f"{C.CYAN}{'═'*width}{C.RESET}")
         print(f"  {C.BOLD}{C.WHITE}SysNarrator{C.RESET} {C.DIM}{version}{C.RESET}  {C.DIM}•{C.RESET}  {C.CYAN}{now}{C.RESET}  {C.DIM}•{C.RESET}  {C.MAGENTA}{hostname}{C.RESET}")
-        print(f"{C.CYAN}{'═'*60}{C.RESET}")
+        print(f"  {C.GREEN_PRO}{os_str}{C.RESET}")
+        if task_str:
+            print(f"  {C.DIM}{task_str}{C.RESET}")
+        print(f"{C.CYAN}{'═'*width}{C.RESET}")
+
 
 
 def print_system_bars(no_color=False):

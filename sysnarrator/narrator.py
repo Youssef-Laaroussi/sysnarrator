@@ -5,6 +5,7 @@ Transforms raw system metrics into human-readable messages.
 
 import psutil
 import time
+from sysnarrator.collectors.system_info import SystemInfoCollector
 
 
 class ProcessHistory:
@@ -114,6 +115,8 @@ class Narrator:
         self.top_n = top_n
         self.boot_time = psutil.boot_time()
         self.history = ProcessHistory()
+        self.prev_disk_io = psutil.disk_io_counters()
+        self.prev_io_time = time.time()
 
     def _fmt_bytes(self, mb: float) -> str:
         if mb >= 1024:
@@ -228,9 +231,25 @@ class Narrator:
                 else:
                     warning = self._msg('disk_filling', hours=int(hours))
                     msgs.append({'level': 'warning', 'text': warning, 'category': cat})
+            # Disk I/O throughput (HTOP/IOTOP capability)
+            now = time.time()
+            io = psutil.disk_io_counters()
+            if io and hasattr(self, 'prev_disk_io') and self.prev_disk_io:
+                dt = max(0.1, now - self.prev_io_time)
+                read_rate = ((io.read_bytes - self.prev_disk_io.read_bytes) / 1024 / 1024) / dt
+                write_rate = ((io.write_bytes - self.prev_disk_io.write_bytes) / 1024 / 1024) / dt
+                if read_rate > 0.1 or write_rate > 0.1:
+                    msgs.append({
+                        'level': 'info',
+                        'text': self._msg('io_rates', read_rate=read_rate, write_rate=write_rate),
+                        'category': cat
+                    })
+            self.prev_disk_io = io
+            self.prev_io_time = now
         except Exception:
             pass
         return msgs
+
 
     def narrate_network(self) -> list[dict]:
         msgs = []
@@ -294,12 +313,11 @@ class Narrator:
         return [{'level': level, 'text': self._msg(key, dur=dur), 'category': cat}]
 
     def narrate_system_health(self) -> list[dict]:
-        """Narrate overall system health score."""
+        """Narrate overall system health, Linux OS background, tasks, and load."""
         msgs = []
         score = self.get_system_health_score()
-        
         cat = 'System' if self.lang == 'en' else 'Système'
-        
+
         if score >= 90:
             level, status = 'ok', 'health_excellent'
         elif score >= 75:
@@ -308,11 +326,91 @@ class Narrator:
             level, status = 'warning', 'health_fair'
         else:
             level, status = 'critical', 'health_poor'
-        
+
         text = self._msg(status, score=int(score))
         msgs.append({'level': level, 'text': text, 'category': cat})
-        
+
+        # Linux OS environment & hardware background
+        try:
+            env = SystemInfoCollector.get_linux_environment()
+            msgs.append({
+                'level': 'info',
+                'text': self._msg('env_info', os_name=env['os_name'], kernel=env['kernel'], arch=env['arch'], desktop=env['desktop']),
+                'category': cat
+            })
+        except Exception:
+            pass
+
+        # Load average & CPU saturation
+        try:
+            load = SystemInfoCollector.get_load_saturation()
+            sat = load['saturation1_pct']
+            if sat > 100:
+                msgs.append({
+                    'level': 'warning',
+                    'text': self._msg('load_saturation_warn', sat=sat, cores=load['cores'], load1=load['load1']),
+                    'category': cat
+                })
+            else:
+                msgs.append({
+                    'level': 'ok',
+                    'text': self._msg('load_saturation_ok', load1=load['load1'], load5=load['load5'], load15=load['load15'], sat=sat, cores=load['cores']),
+                    'category': cat
+                })
+        except Exception:
+            pass
+
+        # Task & Thread accounting (HTOP++)
+        try:
+            tasks = SystemInfoCollector.get_task_stats()
+            msgs.append({
+                'level': 'info',
+                'text': self._msg('tasks_summary', total=tasks['total_processes'], running=tasks['running'], sleeping=tasks['sleeping'], threads=tasks['total_threads']),
+                'category': cat
+            })
+            if tasks['zombie'] > 0:
+                pids_str = ', '.join(str(p) for p in tasks['zombie_pids'][:5])
+                msgs.append({
+                    'level': 'warning',
+                    'text': self._msg('tasks_zombies_alert', count=tasks['zombie'], pids=pids_str),
+                    'category': cat
+                })
+            if tasks['uninterruptible_disk_sleep'] > 0:
+                pids_str = ', '.join(str(p) for p in tasks['d_state_pids'][:5])
+                msgs.append({
+                    'level': 'critical',
+                    'text': self._msg('tasks_dstate_alert', count=tasks['uninterruptible_disk_sleep'], pids=pids_str),
+                    'category': cat
+                })
+        except Exception:
+            pass
+
+        # Battery / Power status (if available)
+        try:
+            battery = SystemInfoCollector.get_battery_info()
+            if battery:
+                state = 'charging' if battery['power_plugged'] else 'discharging'
+                if self.lang == 'fr':
+                    state = 'en charge' if battery['power_plugged'] else 'sur batterie'
+                elif self.lang == 'ar':
+                    state = 'شحن' if battery['power_plugged'] else 'بطارية'
+
+                if battery['secsleft'] and battery['secsleft'] > 0:
+                    mins = battery['secsleft'] / 60
+                    time_str = self._fmt_duration(mins)
+                else:
+                    time_str = 'AC power' if self.lang == 'en' else ('secteur' if self.lang == 'fr' else 'تيار مستمر')
+
+                msgs.append({
+                    'level': 'info',
+                    'text': self._msg('battery_status', pct=battery['percent'], state=state, time_str=time_str),
+                    'category': cat
+                })
+        except Exception:
+            pass
+
         return msgs
+
 
     def narrate_top_processes(self) -> list[dict]:
         msgs = []
@@ -470,6 +568,14 @@ MESSAGES = {
         'health_good': '💚 System Health: {score}/100 — Good, minor issues',
         'health_fair': '💛 System Health: {score}/100 — Fair, attention needed',
         'health_poor': '❌ System Health: {score}/100 — Poor, critical action required',
+        'env_info': '🖥️  OS: {os_name} | Kernel: {kernel} ({arch}) | Desktop: {desktop}',
+        'tasks_summary': '📋 Tasks: {total} total, {running} running, {sleeping} sleeping, {threads} threads',
+        'tasks_zombies_alert': '⚠️  Zombie processes detected ({count} zombie(s), PIDs: {pids}) — Parent process failed to wait on children.',
+        'tasks_dstate_alert': '🚨 Uninterruptible sleep (D-state) detected ({count} process(es), PIDs: {pids}) — Blocked on disk/NFS I/O hang!',
+        'load_saturation_ok': '⚖️  Load: {load1:.2f}, {load5:.2f}, {load15:.2f} — {sat:.0f}% capacity on {cores} cores (balanced)',
+        'load_saturation_warn': '⚠️  High load saturation: {sat:.0f}% on {cores} cores (Load 1m: {load1:.2f}) — Processes queueing for CPU.',
+        'battery_status': '⚡ Battery: {pct:.0f}% ({state}) — {time_str}',
+        'io_rates': '💾 Disk I/O throughput: Read {read_rate:.1f} MB/s — Write {write_rate:.1f} MB/s',
     },
     'fr': {
         'cpu_critical':  '🔥 CPU saturé à {pct:.0f}% — le système est sous pression extrême.',
@@ -504,6 +610,14 @@ MESSAGES = {
         'health_good': '💚 Santé du système : {score}/100 — Bon, problèmes mineurs',
         'health_fair': '💛 Santé du système : {score}/100 — Acceptable, attention requise',
         'health_poor': '❌ Santé du système : {score}/100 — Mauvais, action critique.',
+        'env_info': '🖥️  Système : {os_name} | Kernel : {kernel} ({arch}) | Bureau : {desktop}',
+        'tasks_summary': '📋 Tâches : {total} au total, {running} active(s), {sleeping} en veille, {threads} threads',
+        'tasks_zombies_alert': '⚠️  Processus zombies détectés ({count} zombie(s), PIDs : {pids}) — Le processus parent n\'a pas récupéré ses enfants.',
+        'tasks_dstate_alert': '🚨 Veille ininterruptible (état D) détectée ({count} processus, PIDs : {pids}) — Bloqué sur I/O disque ou blocage matériel !',
+        'load_saturation_ok': '⚖️  Charge : {load1:.2f}, {load5:.2f}, {load15:.2f} — {sat:.0f}% de capacité sur {cores} cœurs (équilibrée)',
+        'load_saturation_warn': '⚠️  Saturation de charge élevée : {sat:.0f}% sur {cores} cœurs (Charge 1m : {load1:.2f}) — Des processus attendent le CPU.',
+        'battery_status': '⚡ Batterie : {pct:.0f}% ({state}) — {time_str}',
+        'io_rates': '💾 Débit I/O disque : Lecture {read_rate:.1f} Mo/s — Écriture {write_rate:.1f} Mo/s',
     },
     'ar': {
         'cpu_critical':  '🔥 وحدة المعالجة مثقلة بنسبة {pct:.0f}% — النظام تحت ضغط شديد.',
@@ -538,5 +652,14 @@ MESSAGES = {
         'health_good': '💚 صحة النظام: {score}/100 — جيد، مشاكل بسيطة',
         'health_fair': '💛 صحة النظام: {score}/100 — مقبول، يحتاج انتباه',
         'health_poor': '❌ صحة النظام: {score}/100 — سيء، إجراء حرج مطلوب',
+        'env_info': '🖥️  النظام: {os_name} | النواة: {kernel} ({arch}) | الواجهة: {desktop}',
+        'tasks_summary': '📋 المهام: {total} إجمالي، {running} نشطة، {sleeping} خاملة، {threads} خيوط',
+        'tasks_zombies_alert': '⚠️  تم اكتشاف عمليات زومبي ({count}، PIDs: {pids}) — العملية الأم لم تنظف مخرجاتها.',
+        'tasks_dstate_alert': '🚨 سكون غير قابل للمقاطعة (حالة D) مكتشفة ({count} عملية، PIDs: {pids}) — معلقة على إدخال/إخراج القرص!',
+        'load_saturation_ok': '⚖️  الحمل: {load1:.2f}، {load5:.2f}، {load15:.2f} — {sat:.0f}% من السعة على {cores} أنوية (متوازن)',
+        'load_saturation_warn': '⚠️  تشبع حمل مرتفع: {sat:.0f}% على {cores} أنوية (الحمل: {load1:.2f}) — العمليات تنتظر المعالج.',
+        'battery_status': '⚡ البطارية: {pct:.0f}% ({state}) — {time_str}',
+        'io_rates': '💾 معدل سرعة القرص: قراءة {read_rate:.1f} م.ب/ث — كتابة {write_rate:.1f} م.ب/ث',
     },
 }
+
