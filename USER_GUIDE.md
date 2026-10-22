@@ -26,7 +26,7 @@ Appuyez sur `Ctrl + Alt + T` pour ouvrir le terminal.
 
 Copiez-collez cette commande:
 ```bash
-cd /home/youssef/sysnarrator
+cd sysnarrator
 ```
 
 Puis appuyez sur **Entrée**.
@@ -354,7 +354,7 @@ rm -rf ~/Téléchargements/*
 
 **Étapes:**
 1. Ouvrir terminal: `Ctrl + Alt + T`
-2. Aller au dossier: `cd /home/youssef/sysnarrator`
+2. Aller au dossier: `cd sysnarrator`
 3. Activer: `. venv/bin/activate`
 4. Voir le rapport: `./sysnarrator-pro.sh --no-color`
 5. Lire la "Expert Analysis" - c'est votre réponse!
@@ -435,7 +435,7 @@ Doit toujours avoir 10% libre minimum.
 Si vous êtes pressé, voici le **minimum à savoir:**
 
 - [ ] **Ouvrir terminal:** `Ctrl + Alt + T`
-- [ ] **Aller au dossier:** `cd /home/youssef/sysnarrator`
+- [ ] **Aller au dossier:** `cd sysnarrator`
 - [ ] **Activer:** `. venv/bin/activate`
 - [ ] **Voir le rapport:** `./sysnarrator-pro.sh --no-color`
 - [ ] **Lire le Health Score:** C'est votre note

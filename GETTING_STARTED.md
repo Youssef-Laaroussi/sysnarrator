@@ -7,7 +7,7 @@ Here's what you can do now:
 ##  Quick Start
 
 ```bash
-cd /home/youssef/sysnarrator
+cd sysnarrator
 
 # 1. See the features showcase
 ./demo.sh

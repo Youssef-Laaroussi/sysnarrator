@@ -71,3 +71,50 @@ class ProcessCollector:
         """Get all process IDs"""
         return psutil.pids()
 
+    @staticmethod
+    def get_grouped_applications():
+        """Group processes by application name (e.g. Brave, Chrome, VS Code) to show collective RAM/CPU"""
+        groups = {}
+        for proc in psutil.process_iter(['pid', 'name', 'memory_info', 'cpu_percent']):
+            try:
+                name = proc.info['name']
+                # Group common multi-process applications
+                app_key = name
+                lower = name.lower()
+                if 'brave' in lower:
+                    app_key = 'Brave Browser'
+                elif 'chrome' in lower or 'chromium' in lower:
+                    app_key = 'Google Chrome'
+                elif 'firefox' in lower:
+                    app_key = 'Firefox Browser'
+                elif 'code' in lower or 'antigravity' in lower:
+                    app_key = 'IDE / Editor'
+                elif 'python' in lower:
+                    app_key = 'Python'
+                elif 'mysql' in lower or 'mariadb' in lower:
+                    app_key = 'MySQL Database'
+                elif 'node' in lower:
+                    app_key = 'Node.js'
+                elif 'docker' in lower or 'containerd' in lower:
+                    app_key = 'Docker Engine'
+
+                if app_key not in groups:
+                    groups[app_key] = {
+                        'app': app_key,
+                        'process_count': 0,
+                        'ram_mb': 0.0,
+                        'cpu_percent': 0.0,
+                        'pids': []
+                    }
+                groups[app_key]['process_count'] += 1
+                groups[app_key]['ram_mb'] += (proc.info['memory_info'].rss / 1024 / 1024)
+                groups[app_key]['cpu_percent'] += (proc.info['cpu_percent'] or 0.0)
+                if len(groups[app_key]['pids']) < 5:
+                    groups[app_key]['pids'].append(proc.info['pid'])
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+
+        results = list(groups.values())
+        results.sort(key=lambda x: x['ram_mb'], reverse=True)
+        return results
+

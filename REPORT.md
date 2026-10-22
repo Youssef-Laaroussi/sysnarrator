@@ -51,7 +51,7 @@ SYSTEM HEALTH SCORE: 72/100 - FAIR
 ### Using a virtual environment
 
 ```bash
-cd /home/youssef/sysnarrator
+cd sysnarrator
 source venv/bin/activate
 pip install -e .
 ```
@@ -327,7 +327,7 @@ watch -n 30 'sysnarrator --no-color'
 sysnarrator --no-color >> ~/.local/share/sysnarrator.log
 
 # As cron job (hourly report)
-0 * * * * cd /home/youssef/sysnarrator && source venv/bin/activate && sysnarrator --no-color >> ~/reports/system.log
+0 * * * * cd sysnarrator && source venv/bin/activate && sysnarrator --no-color >> ~/reports/system.log
 ```
 
 ### With Scripts

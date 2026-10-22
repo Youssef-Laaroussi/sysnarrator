@@ -246,6 +246,19 @@ class Narrator:
                     })
             self.prev_disk_io = io
             self.prev_io_time = now
+
+            # Innovative Disk Reclamation Analysis: identify top hogs and commands
+            if pct >= 80:
+                from .collectors.disk import DiskCollector
+                cleanups = DiskCollector.get_cleanup_opportunities()
+                if cleanups:
+                    top_cleanup = cleanups[0]
+                    cat_clean = 'Disk' if self.lang == 'en' else 'Disque'
+                    msgs.append({
+                        'level': 'warning',
+                        'text': f"Reclaim Space: {top_cleanup['target']} holds {top_cleanup['reclaimable_mb']:.0f} MB -> run: {top_cleanup['command']}",
+                        'category': cat_clean
+                    })
         except Exception:
             pass
         return msgs
@@ -254,12 +267,17 @@ class Narrator:
     def narrate_network(self) -> list[dict]:
         msgs = []
         try:
-            n1 = psutil.net_io_counters()
-            time.sleep(1)
+            now = time.time()
             n2 = psutil.net_io_counters()
-
-            recv = (n2.bytes_recv - n1.bytes_recv) / 1024
-            sent = (n2.bytes_sent - n1.bytes_sent) / 1024
+            if hasattr(self, 'prev_net_io') and self.prev_net_io:
+                dt = max(0.1, now - self.prev_net_time)
+                recv = ((n2.bytes_recv - self.prev_net_io.bytes_recv) / 1024) / dt
+                sent = ((n2.bytes_sent - self.prev_net_io.bytes_sent) / 1024) / dt
+            else:
+                recv = 0.0
+                sent = 0.0
+            self.prev_net_io = n2
+            self.prev_net_time = now
 
             if recv > 1024 or sent > 1024:
                 level, key = 'warning', 'net_heavy'
@@ -459,6 +477,24 @@ class Narrator:
                 'text': self._msg('proc_suggest', name=p['name'], ram=self._fmt_bytes(p['ram_mb']), dur=self._fmt_duration(p['duration'])),
                 'category': cat
             })
+
+        # Innovative Aggregated Application View (surpassing single PID lists)
+        try:
+            from .collectors.processes import ProcessCollector
+            app_groups = ProcessCollector.get_grouped_applications()
+            # Top 3 application groups by collective RAM
+            top_apps = [a for a in app_groups if a['ram_mb'] > 200][:3]
+            if top_apps:
+                app_lines = []
+                for a in top_apps:
+                    app_lines.append(f"{a['app']} ({a['process_count']} procs: {self._fmt_bytes(a['ram_mb'])})")
+                msgs.append({
+                    'level': 'info',
+                    'text': f"  App Footprint: {' | '.join(app_lines)}",
+                    'category': cat
+                })
+        except Exception:
+            pass
 
         return msgs
 

@@ -12,8 +12,6 @@ class SystemExpertAnalyzer:
     Advanced system analysis and recommendations.
     Provides detailed explanations in English, French, and Arabic.
     """
-SystemAnalyzer = SystemExpertAnalyzer
-
 
     EXPERT_TIPS = {
         'en': {
@@ -331,3 +329,5 @@ SystemAnalyzer = SystemExpertAnalyzer
 
 # Utility import
 import os
+
+SystemAnalyzer = SystemExpertAnalyzer

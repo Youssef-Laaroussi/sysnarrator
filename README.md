@@ -24,19 +24,26 @@
 
 ---
 
+## Overview
+
+![SysNarrator Command Center](docs/screenshots/overview.svg)
+
 ## Why SysNarrator?
 
-Every Linux tool — `top`, `vmstat`, `iostat` — throws **raw numbers** at you.  
-You need to **already know** what those numbers mean to act on them.
+Standard terminal monitors throw walls of raw metrics at you.
+**SysNarrator is an Observability Command Center that talks**: it understands the context, predicts failure modes, and gives you actionable copyable remediation commands.
 
-**SysNarrator is different.**  
-It observes your system, understands the context, and tells you **exactly what's happening and what to do** — in plain language. No jargon. No guessing.
-
-| Classic tools | SysNarrator |
-|---|---|
-| `CPU: 87%` | `CPU saturé à 87% — Firefox + VSCode en sont la cause principale` |
-| `MEM: 7.2G / 8G` | `RAM critique (90%) — Slack tourne depuis 6h et fuit de la mémoire` |
-| `/dev/sda1: 91%` | `Disque à 91% — ~/.cache représente 12 Go, nettoyable facilement` |
+| Capability | Standard Monitors | SysNarrator |
+|---|:---:|:---:|
+| **Plain-Language Narration** (EN / FR / AR) | ❌ | ✅ Real-time narrative story |
+| **Health Score (0-100)** with Explainable Penalties | ❌ | ✅ Itemized health breakdown |
+| **Actionable Remediation Commands** | ❌ | ✅ Copyable safe commands (`journalctl`, `rm -rf cache`) |
+| **Memory Leak Slope Detection** | ❌ | ✅ Linear regression MB/min growth |
+| **Disk Exhaustion Forecast** | ❌ | ✅ Predictive ETA calculation |
+| **Root-Cause Analysis** (D-State I/O / Zombies) | ❌ | ✅ Instant root-cause pinpointer |
+| **Grouped Application Footprint** | ❌ | ✅ Multi-process aggregation (Brave, Chrome, IDEs) |
+| **High-Density Braille Area Charts** | Optional | ✅ Real-time 2x4 sub-pixel vector charts |
+| **Multi-Core Heatmap Strip** | ❌ | ✅ Colored per-core load blocks |
 
 ---
 

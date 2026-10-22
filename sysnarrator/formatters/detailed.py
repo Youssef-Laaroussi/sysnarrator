@@ -6,8 +6,6 @@ class DetailedFormatter:
     """
     Detailed system analysis formatter with clean color scheme.
     """
-ProfessionalFormatter = DetailedFormatter
-
 
     class Colors:
         # Professional ANSI colors
