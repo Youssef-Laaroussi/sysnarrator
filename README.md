@@ -43,29 +43,40 @@ It observes your system, understands the context, and tells you **exactly what's
 ## Features
 
 - **Human narration** — Every metric becomes a meaningful sentence
-- **Process history** — Tracks how long each app has been running and consuming
-- **Smart suggestions** — Actionable tips, not just observations
-- **Temperature monitoring** — With thermal alerts before damage
-- **Network in plain words** — Real-time + session totals
+- **Full Linux background** — Distro name, kernel, desktop environment, and architecture
+- **HTOP++ task accounting** — Tasks count, running threads, and automatic zombie / D-state process detection
+- **Load saturation vs core count** — True capacity calculation across logical/physical cores
+- **Disk I/O throughput** — Real-time read and write rates in MB/s (merges htop + iotop)
+- **Process history & memory leak detection** — Tracks runtime and calculates leak probability scores
+- **Predictive disk exhaustion** — Hours-until-full countdown based on trend extrapolation
+- **Battery & power monitoring** — Health, charging state, and remaining runtime
+- **Smart suggestions** — Actionable tips and exact commands, not just observations
+- **Temperature monitoring** — Thermal sensors with throttling alerts
 - **Multi-format output** — Terminal (colored), JSON, plain text
 - **Watch mode** — Live dashboard, refreshes every N seconds
-- **Multi-language** — English, Français, العربية (and more via contributions)
-- **Zero bloat** — Only depends on `psutil`, nothing else
-- **Docker support** — Run in containers too
+- **Multi-language** — English, Français, العربية
 
 ---
 
 ## Example Output
 
 ```text
-════════════════════════════════════════════════════════════
-  SysNarrator v0.1.0  •  14:32:05  •  ubuntu-pc
-════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
+  SysNarrator v0.1.0  •  14:32:05  •  ubuntu-workstation
+  Ubuntu 24.04 LTS  •  Linux 6.8.0-45-generic
+  Tasks: 284 total, 2 run, 0 zombie  •  Load: 0.45 0.52 0.48 [11%]
+════════════════════════════════════════════════════════════════════
 
   CPU      [████░░░░░░░░░░░░░░░░░░░░░]  18.0%
   Mem      [███████████████████░░░░░░]  76.0%
   Swp      [██░░░░░░░░░░░░░░░░░░░░░░░]   6.5%
   Dsk      [████████████████░░░░░░░░░]  82.0%
+
+  [SYSTEM]
+  System Health: 92/100 — Excellent, running optimally
+  OS: Ubuntu 24.04 LTS | Kernel: 6.8.0-45-generic (x86_64) | Desktop: GNOME
+  Load: 0.45, 0.52, 0.48 — 11% capacity on 4 cores (balanced)
+  Tasks: 284 total, 2 running, 282 sleeping, 892 threads
 
   [UPTIME]
   System running for 2 days, 14 hours
@@ -80,12 +91,14 @@ It observes your system, understands the context, and tells you **exactly what's
 
   [DISK]
   Disque OK : 45 Go libres sur 256 Go (82% utilise)
+  Disk I/O throughput: Read 12.4 MB/s — Write 3.1 MB/s
 
   [NETWORK]
   Reseau actif : ↓ 248 Ko/s — ↑ 12 Ko/s
 
   [PROCESSES]
   1. firefox        (PID  2341)  → 2.1 Go RAM depuis 4h
+  2. code           (PID  8912)  → 1.4 Go RAM depuis 2h | CPU 24%
   Firefox consomme beaucoup — redemarrer libererait de la memoire.
 ```
 

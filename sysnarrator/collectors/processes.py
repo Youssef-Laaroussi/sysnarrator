@@ -49,7 +49,7 @@ class ProcessCollector:
 
     @staticmethod
     def get_top_processes_by_io(n=5):
-        """Get top N processes by disk I/O activity (surpasses iotop/htop)"""
+        """Get top N processes by disk I/O activity"""
         io_procs = []
         for proc in psutil.process_iter(['pid', 'name']):
             try:

@@ -65,7 +65,7 @@ def _severity_color(percent: float) -> str:
 
 
 def print_colored_bar(label, percent, width=30, no_color=False, base_color: str | None = None):
-    """Print HTOP-style bar.
+    """Print resource meter bar.
 
     Design rule: bar color is stable per resource (CPU=orange, Mem=blue, Disk=green),
     while the percentage text reflects severity (green/orange/yellow/red).
@@ -119,7 +119,7 @@ def print_header(no_color=False):
 
 
 def print_system_bars(no_color=False):
-    """Print HTOP-style resource bars"""
+    """Print resource bars"""
     cpu = psutil.cpu_percent(interval=0.3)
     mem = psutil.virtual_memory()
     swap = psutil.swap_memory()

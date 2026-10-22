@@ -75,7 +75,7 @@ class SystemInfoCollector:
 
     @staticmethod
     def get_task_stats() -> dict:
-        """Collect deep task & thread stats beyond HTOP (running, sleeping, zombies, D-state)."""
+        """Collect deep task & thread stats (running, sleeping, zombies, D-state)."""
         stats = {
             'total_processes': 0,
             'total_threads': 0,

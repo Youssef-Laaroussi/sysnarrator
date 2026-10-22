@@ -98,32 +98,36 @@ sysnarrator --no-color
 
 ## Features Beyond HTOP
 
+| Feature | `htop` | `SysNarrator` |
+|---|---|---|
+| **Interpretation** | Raw numbers only | Full natural language narration |
+| **Linux OS Background** | Minimal (Uptime, hostname) | Complete Distro, Kernel, Desktop Environment, Architecture |
+| **Zombie / D-state Detection** | Passive letter state (`Z`, `D`) | Proactive detection with alert and PIDs |
+| **Disk I/O Throughput** | Missing (requires `iotop`) | Built-in real-time Read/Write MB/s throughput |
+| **Load vs Cores Context** | Raw 1/5/15 load values | Computes true core saturation percentage |
+| **Predictive Warnings** | None | Disk-full countdown & memory leak scoring |
+| **Actionable Suggestions** | None | Actionable commands and remediation tips |
+| **Battery & Power** | None | Battery %, charge state, and time remaining |
+
 ✅ **Human-Readable Narration**
 - Natural language descriptions of system state
-- Conversational tone with emojis
-- Contextual recommendations
+- Root cause diagnosis and contextual recommendations
 
-✅ **Intelligent Alerts**
-- Memory leak detection with ML-style pattern matching
-- Thermal warnings
-- Swap space monitoring
-- Network activity analysis
+✅ **Deep Linux Environment & Task Accounting**
+- Linux distribution identification (Ubuntu, Debian, Fedora, Arch, etc.)
+- Kernel version, CPU architecture, and Desktop session (GNOME, KDE, Wayland, X11)
+- Real-time task states (total, running, sleeping, threads)
+- Proactive alerts for zombie processes and uninterruptible D-state I/O hangs
 
-✅ **Historical Trend Analysis**
-- Long-term system behavior tracking
-- 1-hour trend window for deep analysis
-- CPU frequency monitoring
-- Disk usage extrapolation
+✅ **Disk I/O Rate Tracking (HTOP + IOTOP unified)**
+- Real-time read and write throughput in MB/s
+- Detection of heavy disk flush events
 
-✅ **Predictive Maintenance**
-- Disk full predictions
-- Memory pressure forecasting
-- Thermal trend analysis
+✅ **Intelligent Alerts & Predictive Analysis**
+- Memory leak detection with confidence scoring
+- Predictive disk exhaustion countdown (hours until full)
+- Thermal warnings and CPU throttling prevention
 
-✅ **Professional Reporting**
-- Structured JSON output for monitoring systems
-- Category-based message organization
-- Severity levels (ok, info, warning, critical)
 
 ## Command Examples
 

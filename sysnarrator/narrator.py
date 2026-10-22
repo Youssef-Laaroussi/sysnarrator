@@ -231,7 +231,7 @@ class Narrator:
                 else:
                     warning = self._msg('disk_filling', hours=int(hours))
                     msgs.append({'level': 'warning', 'text': warning, 'category': cat})
-            # Disk I/O throughput (HTOP/IOTOP capability)
+            # Disk I/O throughput
             now = time.time()
             io = psutil.disk_io_counters()
             if io and hasattr(self, 'prev_disk_io') and self.prev_disk_io:
@@ -360,7 +360,7 @@ class Narrator:
         except Exception:
             pass
 
-        # Task & Thread accounting (HTOP++)
+        # Task & Thread accounting
         try:
             tasks = SystemInfoCollector.get_task_stats()
             msgs.append({
