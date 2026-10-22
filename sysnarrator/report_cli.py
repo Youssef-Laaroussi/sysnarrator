@@ -9,18 +9,10 @@ import sys
 from datetime import datetime
 from . import __version__
 from .narrator import Narrator
-from .formatters.professional import ProfessionalFormatter
-from .expert_analyzer import SystemExpertAnalyzer
-
-
-class ProfessionalCLI:
-    """Professional command-line interface with expert analysis"""
-
-    def __init__(self, args):
         self.args = args
         self.narrator = Narrator(lang=args.lang, top_n=args.top)
         self.no_color = args.no_color or not sys.stdout.isatty()
-        self.formatter = ProfessionalFormatter()
+        self.formatter = DetailedFormatter()
 
     def print_header(self):
         """Print professional header"""
@@ -243,12 +235,12 @@ For detailed optimization help, see the expert analysis output.
     return parser
 
 
-def main_professional():
-    """Main entry point for professional CLI"""
+def main_report():
+    """Main entry point for report CLI"""
     parser = build_professional_parser()
     args = parser.parse_args()
     
-    cli = ProfessionalCLI(args)
+    cli = ReportCLI(args)
     
     if args.json:
         # JSON mode
@@ -260,12 +252,14 @@ def main_professional():
         }
         print(json.dumps(data, indent=2, ensure_ascii=False))
     else:
-        # Professional report mode
         cli.run_professional_report()
 
+
+main_professional = main_report
 
 # Import for expert analyzer
 import psutil
 
 if __name__ == '__main__':
-    main_professional()
+    main_report()
+

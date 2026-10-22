@@ -9,9 +9,11 @@ import time
 
 class SystemExpertAnalyzer:
     """
-    Advanced system analysis with expert recommendations.
+    Advanced system analysis and recommendations.
     Provides detailed explanations in English, French, and Arabic.
     """
+SystemAnalyzer = SystemExpertAnalyzer
+
 
     EXPERT_TIPS = {
         'en': {

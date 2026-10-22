@@ -131,7 +131,7 @@ sysnarrator/
 ├── sysnarrator-pro.sh          ← Main professional CLI
 ├── stress-test.sh              ← Load testing tool
 ├── demo.sh                     ← Feature showcase
-├── PROFESSIONAL.md             ← Complete guide (60+ pages)
+├── REPORT.md                   ← Detailed report guide
 ├── sysnarrator/
 │   ├── professional_cli.py     ← Pro CLI logic
 │   ├── expert_analyzer.py      ← Expert analysis engine
@@ -211,7 +211,7 @@ sudo smartctl -a /dev/sda
 For detailed documentation, see:
 
 ```bash
-cat PROFESSIONAL.md
+cat REPORT.md
 ```
 
 Covers:
@@ -243,7 +243,7 @@ Covers:
 
 4. **Read full docs**
    ```bash
-   less PROFESSIONAL.md
+   less REPORT.md
    ```
 
 5. **Set up monitoring**
@@ -305,7 +305,7 @@ mkdir -p ~/reports
 ./demo.sh
 
 # Read documentation  
-cat PROFESSIONAL.md
+cat REPORT.md
 
 # Check original version
 ./sysnarrator.sh --help

@@ -77,7 +77,7 @@ Seulement les infos importantes.
 
 ---
 
-## 🎨 Que Signifient les Couleurs et les Résultats
+##  Que Signifient les Couleurs et les Résultats
 
 ### Le Score de Santé (HEALTH SCORE)
 
@@ -451,7 +451,7 @@ Si vous êtes pressé, voici le **minimum à savoir:**
 ./sysnarrator-pro.sh --help
 
 # Voir la documentation complète
-cat PROFESSIONAL.md
+cat REPORT.md
 
 # Lancer la démo
 ./demo.sh

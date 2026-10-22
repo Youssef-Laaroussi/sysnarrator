@@ -2,11 +2,12 @@
 import sys
 
 
-class ProfessionalFormatter:
+class DetailedFormatter:
     """
-    Professional system analysis formatter with modern color scheme.
-    Colors: Orange (#FF9500), Blue (#0A84FF), Gray (#5E5CE6), Green (#34C759)
+    Detailed system analysis formatter with clean color scheme.
     """
+ProfessionalFormatter = DetailedFormatter
+
 
     class Colors:
         # Professional ANSI colors

@@ -129,8 +129,8 @@ sysnarrator
 # Watch mode (updates every 2 seconds)
 sysnarrator --watch
 
-# Professional analysis (with health score)
-python -m sysnarrator.professional_cli
+# Detailed report (with health score)
+python -m sysnarrator.report_cli
 
 # Export as JSON
 sysnarrator --json > system_report.json
@@ -145,7 +145,7 @@ sysnarrator --no-color
 
 - **[GETTING_STARTED.md](GETTING_STARTED.md)** — Installation & first steps
 - **[USER_GUIDE.md](USER_GUIDE.md)** — Complete feature guide
-- **[PROFESSIONAL.md](PROFESSIONAL.md)** — Professional analysis features
+- **[REPORT.md](REPORT.md)** — Detailed report guide
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — How to contribute
 
 ### Run
