@@ -60,10 +60,10 @@ The core `Narrator` class transforms metrics into human-readable messages.
 | `narrate_top_processes()` | Top RAM consumers with suggestions |
 
 #### Message Levels:
-- **critical** 🔴 — Immediate action needed (e.g., CPU >90%)
-- **warning** 🟡 — Degradation possible (e.g., RAM >75%)
-- **info** 🔵 — Informational (e.g., mode details)
-- **ok** 🟢 — System healthy (e.g., CPU <40%)
+- **critical**  — Immediate action needed (e.g., CPU >90%)
+- **warning**  — Degradation possible (e.g., RAM >75%)
+- **info**  — Informational (e.g., mode details)
+- **ok**  — System healthy (e.g., CPU <40%)
 
 #### Formatting Utilities:
 ```python
@@ -181,8 +181,8 @@ i18n/
 The `MESSAGES` dictionary in `narrator.py` contains all locale templates:
 
 ```python
-MESSAGES['en']['cpu_critical'] = '🔥 CPU saturated at {pct:.0f}%...'
-MESSAGES['fr']['cpu_critical'] = '🔥 CPU saturé à {pct:.0f}%...'
+MESSAGES['en']['cpu_critical'] = ' CPU saturated at {pct:.0f}%...'
+MESSAGES['fr']['cpu_critical'] = ' CPU saturé à {pct:.0f}%...'
 ```
 
 Language selection at initialization:

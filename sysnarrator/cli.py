@@ -252,7 +252,7 @@ def main():
                     print(f"\n  {C.DIM}Refreshing every {args.interval}s — Ctrl+C to quit{C.RESET}")
                 time.sleep(args.interval)
         except KeyboardInterrupt:
-            print("\n\nGoodbye! 👋")
+            print("\n\nGoodbye! ")
     else:
         print_header(no_color)
         print_system_bars(no_color)

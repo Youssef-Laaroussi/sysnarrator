@@ -41,9 +41,9 @@ from .narrator import Narrator
         
         if not issues:
             if not self.no_color:
-                print(f"  {self.formatter.Colors.GREEN}{self.formatter.Colors.BOLD}✓ System running optimally{self.formatter.Colors.RESET}")
+                print(f"  {self.formatter.Colors.GREEN}{self.formatter.Colors.BOLD} System running optimally{self.formatter.Colors.RESET}")
             else:
-                print("  ✓ System running optimally")
+                print("   System running optimally")
             return
 
         print(self.formatter.format_header("EXPERT ANALYSIS", self.no_color))

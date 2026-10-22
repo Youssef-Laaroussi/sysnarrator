@@ -1,4 +1,4 @@
-# 📖 Guide d'Utilisation - SysNarrator pour Débutants
+#  Guide d'Utilisation - SysNarrator pour Débutants
 
 ## Pour Quelconque Utilisateur - Comment Utiliser le Système
 
@@ -6,7 +6,7 @@
 
 ---
 
-## 📋 Table des Matières
+##  Table des Matières
 
 1. [Installation (5 minutes)](#-installation-5-minutes)
 2. [Utilisation Basique (2 minutes)](#-utilisation-basique-2-minutes)
@@ -16,7 +16,7 @@
 
 ---
 
-## 🔧 Installation (5 minutes)
+##  Installation (5 minutes)
 
 ### Étape 1: Ouvrir le Terminal
 
@@ -40,11 +40,11 @@ Copiez-collez:
 
 Vous verrez apparaître `(venv)` avant votre nom d'utilisateur.
 
-C'est bon? Passez à l'étape suivante! ✅
+C'est bon? Passez à l'étape suivante! 
 
 ---
 
-## 🚀 Utilisation Basique (2 minutes)
+##  Utilisation Basique (2 minutes)
 
 ### Commande #1: Voir l'État du Système
 
@@ -85,11 +85,11 @@ C'est la note de votre ordinateur de 0 à 100:
 
 | Score | Couleur | Meaning | Quoi Faire |
 |-------|---------|---------|-----------|
-| **90-100** | 🟢 Vert | EXCELLENT | Rien à faire, tout va bien! |
-| **75-89** | 🟢 Vert | BON | Tout fonctionne, petites optimisations possibles |
-| **60-74** | 🟡 Orange | MOYEN | Attention, quelque chose ralentit |
-| **40-59** | 🟠 Orange-Rouge | FAIBLE | Plusieurs problèmes, action recommandée |
-| **0-39** | 🔴 Rouge | CRITIQUE | Urgent! Votre PC ralentit beaucoup |
+| **90-100** |  Vert | EXCELLENT | Rien à faire, tout va bien! |
+| **75-89** |  Vert | BON | Tout fonctionne, petites optimisations possibles |
+| **60-74** |  Orange | MOYEN | Attention, quelque chose ralentit |
+| **40-59** |  Orange-Rouge | FAIBLE | Plusieurs problèmes, action recommandée |
+| **0-39** |  Rouge | CRITIQUE | Urgent! Votre PC ralentit beaucoup |
 
 ### Les Barres de Progression
 
@@ -101,9 +101,9 @@ CPU Usage: 45%
 - **Plein (████)** = High usage
 - **Vide (░░░░)** = Low usage
 - La couleur change:
-  - 🟢 **Vert** = OK
-  - 🟡 **Orange** = Attention
-  - 🔴 **Rouge** = Problème
+  -  **Vert** = OK
+  -  **Orange** = Attention
+  -  **Rouge** = Problème
 
 ### CPU (Processeur)
 
@@ -111,7 +111,7 @@ CPU Usage: 45%
 CPU Usage: 45%
 ```
 
-- 0-30% = Normal ✅
+- 0-30% = Normal 
 - 30-70% = Modéré (OK)
 - 70-90% = Élevé (attention)
 - 90-100% = SATURÉ (problème!)
@@ -126,7 +126,7 @@ RAM Usage: 7.2GB / 16GB (45%)
 ```
 
 - Cela veut dire: **7.2 Go utilisé sur 16 Go total**
-- 0-50% = Bien ✅
+- 0-50% = Bien 
 - 50-75% = Normal
 - 75-90% = Serré (attention)
 - 90%+ = CRITIQUE (très lent!)
@@ -141,7 +141,7 @@ Disk Usage: 150GB / 256GB (59%)
 ```
 
 - Cela veut dire: **150 Go utilisé sur 256 Go disponibles**
-- 0-70% = Bien ✅
+- 0-70% = Bien 
 - 70-85% = À surveiller
 - 85-95% = Nettoyage recommandé
 - 95%+ = CRITIQUE (système instable!)
@@ -157,7 +157,7 @@ Swap Usage: 0.5GB / 4GB (10%)
 
 C'est la mémoire de secours quand la RAM est pleine.
 
-- 0-30% = Normal ✅
+- 0-30% = Normal 
 - 30%+ = Votre RAM manque
 - **Beaucoup d'utilisation SWAP = PC TRÈS LENT**
 
@@ -165,31 +165,31 @@ C'est la mémoire de secours quand la RAM est pleine.
 
 ---
 
-## 💡 Qu'est-ce que Signifie "System Running Optimally"?
+##  Qu'est-ce que Signifie "System Running Optimally"?
 
 Si vous voyez ceci:
 
 ```
-✓ System running optimally
+ System running optimally
 ```
 
 **C'est excellent!** Votre ordinateur:
 - N'a pas de problèmes
 - Fonctionne normalement
 - Ne ralentit pas
-- Pas d'action nécessaire ✅
+- Pas d'action nécessaire 
 
 ---
 
-## ⚠️ Qu'est-ce que Signifie "Expert Analysis"?
+##  Qu'est-ce que Signifie "Expert Analysis"?
 
 Parfois elle vous montre des avertissements:
 
 ```
 Expert Analysis:
-├─ ⚠️ High CPU Usage (>80%)
+├─  High CPU Usage (>80%)
    └─ Solutions: Close browser tabs, check processes
-├─ ⚠️ High RAM Usage (>85%)
+├─  High RAM Usage (>85%)
    └─ Solutions: Close heavy apps
 ```
 
@@ -197,7 +197,7 @@ Expert Analysis:
 
 ---
 
-## 📊 Les Processus (TOP PROCESSES)
+##  Les Processus (TOP PROCESSES)
 
 ```
 ► TOP PROCESSES
@@ -217,7 +217,7 @@ Firefox: 600MB
 
 ---
 
-## ❓ Questions Courantes
+##  Questions Courantes
 
 ### Q1: Pourquoi mon PC ralentit?
 
@@ -293,7 +293,7 @@ Cela ajoute le rapport dans le fichier `mon_rapport.txt`.
 
 ---
 
-## 🎯 Commandes Utiles
+##  Commandes Utiles
 
 ### Les Plus Courantes
 
@@ -348,7 +348,7 @@ rm -rf ~/Téléchargements/*
 
 ---
 
-## 📱 Scénarios d'Utilisation
+##  Scénarios d'Utilisation
 
 ### Scénario 1: Mon PC Ralentit, Quoi Faire?
 
@@ -394,7 +394,7 @@ ps aux --sort=-%mem | grep chrome
 
 ---
 
-## 🎓 Comprendre les Concepts
+##  Comprendre les Concepts
 
 ### CPU (Processeur)
 
@@ -416,21 +416,21 @@ Plus elle est pleine, moins vite le PC peut travailler.
 
 Quand la RAM n'est pas suffisante, le PC utilise le disque dur.
 Le disque est **très lent** par rapport à la RAM!
-- Si SWAP = 0% → Parfait ✅
+- Si SWAP = 0% → Parfait 
 - Si SWAP > 30% → Problème, ajouter RAM
 
 ### Disk (Disque Dur)
 
 C'est le "classeur" qui sauvegarde vos fichiers.
 Doit toujours avoir 10% libre minimum.
-- **0-70%**  = Bien ✅
+- **0-70%**  = Bien 
 - **70-85%** = À surveiller
 - **85%+**   = Nettoyer
 - **95%+**   = Critique
 
 ---
 
-## ✅ Checklist Utilisation Simple
+##  Checklist Utilisation Simple
 
 Si vous êtes pressé, voici le **minimum à savoir:**
 
@@ -444,7 +444,7 @@ Si vous êtes pressé, voici le **minimum à savoir:**
 
 ---
 
-## 🆘 Besoin d'Aide?
+##  Besoin d'Aide?
 
 ```bash
 # Voir toutes les options
@@ -459,7 +459,7 @@ cat REPORT.md
 
 ---
 
-## 📝 Résumé Rapide
+##  Résumé Rapide
 
 | Quoi | Commande | Résultat |
 |------|----------|----------|
@@ -471,6 +471,6 @@ cat REPORT.md
 
 ---
 
-**C'est tout! Vous savez maintenant utiliser SysNarrator!** 🎉
+**C'est tout! Vous savez maintenant utiliser SysNarrator!** 
 
-Quelques clics, et vous comprenez l'état de votre ordinateur comme un expert! 💻✨
+Quelques clics, et vous comprenez l'état de votre ordinateur comme un expert! 
