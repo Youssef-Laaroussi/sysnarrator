@@ -55,31 +55,38 @@ It observes your system, understands the context, and tells you **exactly what's
 
 ---
 
-## Screenshots
+## Example Output
 
-```
-╔══════════════════════════════════════════════════════════╗
-║           SysNarrator  •  14:32:05  •  ubuntu-pc         ║
-╠══════════════════════════════════════════════════════════╣
-║  CPU                                                     ║
-║  CPU tranquille à 18% — votre machine respire.           ║
-║  Fréquence : 1800 MHz / 4200 MHz max                     ║
-║                                                          ║
-║  RAM                                                     ║
-║  RAM sous pression : 6.1 Go / 8 Go (76%)                 ║
-║     → Fermez des applications pour libérer de l'espace   ║
-║                                                          ║
-║  Disque                                                  ║
-║  Disque OK : 45 Go libres sur 256 Go (82% utilisé)       ║
-║                                                          ║
-║  Réseau                                                  ║
-║  Réseau actif : ↓ 248 Ko/s — ↑ 12 Ko/s                   ║
-║                                                          ║
-║  Top Processus                                           ║
-║  1. firefox        (PID  2341)  → 2.1 Go RAM depuis 4h   ║
-║  Firefox consomme beaucoup — redémarrer libèrerait       ║
-║     de la mémoire.                                       ║
-╚══════════════════════════════════════════════════════════╝
+```text
+════════════════════════════════════════════════════════════
+  SysNarrator v0.1.0  •  14:32:05  •  ubuntu-pc
+════════════════════════════════════════════════════════════
+
+  CPU      [████░░░░░░░░░░░░░░░░░░░░░]  18.0%
+  Mem      [███████████████████░░░░░░]  76.0%
+  Swp      [██░░░░░░░░░░░░░░░░░░░░░░░]   6.5%
+  Dsk      [████████████████░░░░░░░░░]  82.0%
+
+  [UPTIME]
+  System running for 2 days, 14 hours
+
+  [CPU]
+  CPU tranquille a 18% — votre machine respire.
+  Frequence : 1800 MHz / 4200 MHz max
+
+  [RAM]
+  RAM sous pression : 6.1 Go / 8.0 Go (76%)
+  → Fermez des applications pour liberer de l'espace
+
+  [DISK]
+  Disque OK : 45 Go libres sur 256 Go (82% utilise)
+
+  [NETWORK]
+  Reseau actif : ↓ 248 Ko/s — ↑ 12 Ko/s
+
+  [PROCESSES]
+  1. firefox        (PID  2341)  → 2.1 Go RAM depuis 4h
+  Firefox consomme beaucoup — redemarrer libererait de la memoire.
 ```
 
 ---
